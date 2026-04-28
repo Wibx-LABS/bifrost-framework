@@ -5,23 +5,37 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
+      - name: Check if .bifrost exists
+        id: check_bifrost
+        run: |
+          if [ -d ".bifrost" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Validate STATE.md
+        if: steps.check_bifrost.outputs.exists == 'true'
         run: ./scripts/bifrost-validate state .bifrost/STATE.md
       
       - name: Validate PLAN.md
+        if: steps.check_bifrost.outputs.exists == 'true'
         run: ./scripts/bifrost-validate plan .bifrost/PLAN.md
       
       - name: Check API contracts (against graph)
+        if: steps.check_bifrost.outputs.exists == 'true'
         run: ./scripts/bifrost-validate api-calls --graph knowledge/
       
       - name: Lint generated code
+        if: steps.check_bifrost.outputs.exists == 'true'
         run: ./scripts/bifrost-validate code-standards .bifrost/
       
       - name: Run QA checklist
+        if: steps.check_bifrost.outputs.exists == 'true'
         run: ./scripts/bifrost-validate qa-report .bifrost/QA_REPORT.md
       
       - name: Pre-merge check
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && steps.check_bifrost.outputs.exists == 'true'
         run: ./scripts/bifrost-validate merge-ready

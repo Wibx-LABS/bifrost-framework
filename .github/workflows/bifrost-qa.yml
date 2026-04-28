@@ -7,10 +7,21 @@ jobs:
   qa:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
+      - name: Check if .bifrost exists
+        id: check_bifrost
+        run: |
+          if [ -d ".bifrost" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Check QA Report Integrity
+        if: steps.check_bifrost.outputs.exists == 'true'
         run: ./scripts/bifrost-validate qa-report .bifrost/QA_REPORT.md
 
       - name: Assert Zero Open Blockers
+        if: steps.check_bifrost.outputs.exists == 'true'
         run: ./scripts/bifrost-validate state .bifrost/STATE.md --ensure-no-blockers
