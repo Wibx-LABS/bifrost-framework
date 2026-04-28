@@ -1,0 +1,73 @@
+name: Release Bifrost CLI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: macos-x64
+            os: macos-latest
+            suffix: macos-x64
+          - target: macos-arm64
+            os: macos-latest
+            suffix: macos-arm64
+          - target: linux-x64
+            os: ubuntu-latest
+            suffix: linux-x64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: tools/bifrost-cli/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd tools/bifrost-cli
+          npm install
+
+      - name: Build and Package
+        run: |
+          cd tools/bifrost-cli
+          npm run build
+          npx pkg . --targets node20-${{ matrix.target }} --output ../../bin/bifrost-${{ matrix.suffix }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bifrost-${{ matrix.suffix }}
+          path: bin/bifrost-${{ matrix.suffix }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: bin
+          pattern: bifrost-*
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bin/bifrost-*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

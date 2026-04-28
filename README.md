@@ -142,11 +142,21 @@ bifrost-framework/
 
 ## 💻 Development
 
-### Setup
+### Zero-Config Installation
+
+The fastest way to install Bifrost is using our one-liner script:
+
+```bash
+curl -sL https://raw.githubusercontent.com/Wibx-LABS/bifrost-framework/main/install.sh | bash
+```
+
+### Manual Setup (Developers)
+
+If you prefer to clone the repository and build it yourself:
 
 ```bash
 # Clone the repository
-git clone https://github.com/Token-LABS/bifrost-framework.git
+git clone https://github.com/Wibx-LABS/bifrost-framework.git
 cd bifrost-framework
 
 # Install dependencies and build the CLI

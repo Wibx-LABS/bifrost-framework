@@ -8,7 +8,7 @@ Bifrost CLI is the orchestration engine for the Bifrost framework. It manages th
 
 ```bash
 # Clone the repository
-git clone https://github.com/Token-LABS/bifrost-framework.git
+git clone https://github.com/Wibx-LABS/bifrost-framework.git
 cd bifrost-framework/tools/bifrost-cli
 
 # Install dependencies and build
