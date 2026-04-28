@@ -188,7 +188,8 @@ npm run build
 - Agent accuracy > 95%.
 
 ---
-
 <p align="center">
-  <strong>Token Labs</strong>
+  <strong>Built and maintained by the Wibx Labs team. Internal use only.</strong>
 </p>
+
+
