@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v3
       
       - name: Ensure Conductor Delivered
-        run: bifrost-validate state .bifrost/STATE.md --status=merged
+        run: ./scripts/bifrost-validate state .bifrost/STATE.md --status=merged
       
       - name: Ensure No Blockers
-        run: bifrost-validate merge-ready
+        run: ./scripts/bifrost-validate merge-ready
