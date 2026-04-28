@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Bifrost CI Entry Point
+# Orchestrates all validations in a CI environment
+
+echo "[INFO] Iniciando Validação CI do Bifrost..."
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+VALIDATE="$SCRIPT_DIR/bifrost-validate"
+
+# 1. Validate State
+"$VALIDATE" state .bifrost/STATE.md
+if [ $? -ne 0 ]; then exit 1; fi
+
+# 2. Validate Plan
+"$VALIDATE" plan .bifrost/PLAN.md
+if [ $? -ne 0 ]; then exit 1; fi
+
+# 3. Check API Contracts
+"$VALIDATE" api-calls
+if [ $? -ne 0 ]; then exit 1; fi
+
+# 4. Lint Standards
+"$VALIDATE" standards
+if [ $? -ne 0 ]; then exit 1; fi
+
+# 5. Check QA Report
+"$VALIDATE" qa-report .bifrost/QA_REPORT.md
+if [ $? -ne 0 ]; then exit 1; fi
+
+echo "[OK] Validação CI do Bifrost Aprovada!"
+exit 0

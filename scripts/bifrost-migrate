@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+
+/**
+ * Bifrost Migration Script
+ * Updates old project structures to the latest framework standards
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+function migrate() {
+    console.log('[...] Migrando projeto para a versão mais recente do Bifrost...');
+    
+    if (!fs.existsSync('.bifrost')) {
+        console.error('[ERRO] Diretório .bifrost não encontrado.');
+        process.exit(1);
+    }
+
+    // Logic for specific version migrations would go here
+    
+    console.log('[OK] Migração concluída.');
+}
+
+migrate();

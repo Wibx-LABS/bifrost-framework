@@ -1,0 +1,25 @@
+# Bifrost CI/CD Configuration
+# Controls how hooks and validators behave
+
+hooks:
+  pre-commit:
+    enabled: true
+    validate_state: true
+    strict: true
+  post-merge:
+    enabled: true
+
+validation:
+  state:
+    require_feature_id: true
+    require_timeline: true
+  qa:
+    require_passed: true
+    fail_on_warnings: false
+  api:
+    check_against_graph: true
+    allow_deprecated: false
+
+telemetry:
+  enabled: true
+  metrics_output: ".bifrost/METRICS.json"

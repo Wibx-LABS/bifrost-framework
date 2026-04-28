@@ -1,0 +1,16 @@
+name: Bifrost QA Validation
+on: 
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Check QA Report Integrity
+        run: bifrost-validate qa-report .bifrost/QA_REPORT.md
+
+      - name: Assert Zero Open Blockers
+        run: bifrost-validate state .bifrost/STATE.md --ensure-no-blockers

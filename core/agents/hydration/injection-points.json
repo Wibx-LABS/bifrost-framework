@@ -1,0 +1,27 @@
+{
+  "Intake_Template.md": {
+    "PROJECT_NAME": "{{project-name}}",
+    "TECH_STACK": "{{tech-stack-from-knowledge/}}",
+    "API_BASE_URL": "{{api-base-url-from-config}}",
+    "COMPONENT_LIBRARY": "{{components-from-graphify}}",
+    "KNOWN_GOTCHAS": "{{gotchas-from-knowledge/}}"
+  },
+  "Planner_Template.md": {
+    "PROJECT_NAME": "{{project-name}}",
+    "SCOPE_SUMMARY": "{{impact-summary}}"
+  },
+  "CodeGen_Template.md": {
+    "NAMING_CONVENTIONS": "{{naming-from-knowledge/}}",
+    "CODE_STANDARDS": "{{standards-from-skills/}}",
+    "TESTING_RULES": "{{testing-from-skills/}}",
+    "ARCHITECTURE_GRAPH": "{{graph-location}}"
+  },
+  "QA_Template.md": {
+    "ACCEPTANCE_CRITERIA": "{{health-criteria}}",
+    "TEST_PATTERNS": "{{qa-validator-skill}}"
+  },
+  "Conductor_Template.md": {
+    "STATE_FORMAT": "{{state-management-skill}}",
+    "AUTONOMY_LEVEL": "{{autonomy-level}}"
+  }
+}

@@ -1,0 +1,17 @@
+name: Bifrost Pre-Merge Check
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  merge-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Ensure Conductor Delivered
+        run: bifrost-validate state .bifrost/STATE.md --status=merged
+      
+      - name: Ensure No Blockers
+        run: bifrost-validate merge-ready

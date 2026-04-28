@@ -1,0 +1,27 @@
+name: Bifrost Build Validation
+on: [push]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Validate STATE.md
+        run: bifrost-validate state .bifrost/STATE.md
+      
+      - name: Validate PLAN.md
+        run: bifrost-validate plan .bifrost/PLAN.md
+      
+      - name: Check API contracts (against graph)
+        run: bifrost-validate api-calls --graph knowledge/
+      
+      - name: Lint generated code
+        run: bifrost-validate code-standards .bifrost/
+      
+      - name: Run QA checklist
+        run: bifrost-validate qa-report .bifrost/QA_REPORT.md
+      
+      - name: Pre-merge check
+        if: github.event_name == 'pull_request'
+        run: bifrost-validate merge-ready
