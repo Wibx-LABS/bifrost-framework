@@ -164,23 +164,28 @@ FEATURE COMPLETE ✓
 
 Everything related to one feature lives in `.bifrost/` directory:
 
+**Note:** the artifact set was refined by `instructions/decisions/ADR-010-artifact-set.md`. `HEALTH.md` was deprecated (acceptance criteria live in TRAJECTORY §3 per `instructions/decisions/ADR-008-trajectory-context-protocol.md`). `AUTONOMY.md` was folded into STATE.md frontmatter as the `autonomy:` field. The canonical 10-artifact set:
+
 ```
 .bifrost/
 ├── PATIENT.md           # Feature scope (input by Product)
-├── HEALTH.md            # Quality gates + acceptance criteria
-├── AUTONOMY.md          # Level of AI autonomy (Task-Gated, Phase-Gated, Full)
+├── TRAJECTORY.md        # Locked invariants (output by @Intake — per ADR-008)
 ├── IMPACT.md            # Scope impact analysis (output by @Intake)
 ├── PLAN.md              # Task breakdown (output by @Planner)
-├── STATE.md             # Execution state (updated by @Conductor)
+├── STATE.md             # Execution state (updated by @Conductor; carries autonomy in frontmatter)
 ├── CODE_REVIEW.md       # Self-review results (output by @CodeGen)
 ├── QA_REPORT.md         # Test results (output by @QA)
-├── HANDOFF.md           # Backend delivery (output by @Conductor)
+├── HANDOFF.md           # Backend delivery (output by @Reviewer)
+├── VITALS.md            # Drift report (output by @Monitor; only when drift detected)
+├── PROJECT_CONTEXT.md   # Per-project system prompt (created once at bifrost-init)
 ├── agents/
 │   ├── Intake_HYDRATED.md          # Customized for this project
 │   ├── Planner_HYDRATED.md
 │   ├── CodeGen_HYDRATED.md
 │   ├── QA_HYDRATED.md
-│   └── Conductor_HYDRATED.md
+│   ├── Reviewer_HYDRATED.md
+│   ├── Conductor_HYDRATED.md
+│   └── Monitor_HYDRATED.md
 ├── skills/
 │   ├── bifrost-system-context/SKILL.md
 │   ├── bifrost-code-standards/SKILL.md
@@ -276,7 +281,7 @@ How much can agents decide independently?
 | **Phase-Gated** | Each phase requires approval | Complex features |
 | **Full** | Agents decide and proceed autonomously | Trusted agents + well-defined scope |
 
-Set in `.bifrost/AUTONOMY.md`.
+Set in `.bifrost/STATE.md` frontmatter as the `autonomy:` field (per `instructions/decisions/ADR-010-artifact-set.md`).
 
 ---
 

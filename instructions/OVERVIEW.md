@@ -16,10 +16,12 @@ Welcome. This folder consolidates Bifrost framework documentation into a coheren
 |----------|---------|-----------|
 | **[01-ARCHITECTURE.md](01-ARCHITECTURE.md)** | System design, components, how pieces fit together | You're new to Bifrost, need to understand the big picture |
 | **[02-INITIALIZATION.md](02-INITIALIZATION.md)** | Step-by-step `bifrost init` process, CLI flow, setup | You're setting up a feature project, need to know what happens |
-| **[03-AGENTS-AND-SKILLS.md](03-AGENTS-AND-SKILLS.md)** | Reference: all 7 agents + all 8 skills, what each does | You need to understand a specific agent or skill |
+| **[03-AGENTS-AND-SKILLS.md](03-AGENTS-AND-SKILLS.md)** | Reference: all 7 agents + all 9 skills (incl. `bifrost-hr`), what each does | You need to understand a specific agent or skill |
 | **[04-IMPLEMENTATION-PLAN.md](04-IMPLEMENTATION-PLAN.md)** | Phase-by-phase build roadmap (10 phases), checklist | You're planning framework development work |
 | **[05-SUCCESS-CRITERIA.md](05-SUCCESS-CRITERIA.md)** | Metrics, targets, how we measure success | You're tracking progress, need to know what "done" looks like |
 | **[06-STRATEGY.md](06-STRATEGY.md)** | Business case, ROI, why this matters, stakeholder pitch | You're explaining Bifrost to CTO/leadership |
+| **[decisions/README.md](decisions/README.md)** | Index of binding ADRs (ADR-006 lifecycle / ADR-007 Wiboo target / ADR-008 trajectory protocol / ADR-009 bifrost-hr / ADR-010 artifact set) | You need to understand a specific decision the framework rests on |
+| **[principles/delivery-standards.md](principles/delivery-standards.md)** | Frontend-department-stated delivery standards: focused PRs, structured/documented delivery, Angular components | You're authoring code or reviewing what gets accepted at the merge gate |
 
 ---
 

@@ -53,6 +53,22 @@ This index helps you navigate all documentation files:
 → **Framework Specification.md** (original, section: "SUCCESS CRITERIA") OR  
 → **Operation Bifrost.md** (original, section: "Success Criteria")
 
+### "I need to understand a binding architectural decision"
+
+→ **[instructions/decisions/README.md](../instructions/decisions/README.md)** — index of all active ADRs
+
+The active ADRs are operational specifications every agent and skill respects:
+
+- **[ADR-006: Feature lifecycle](../instructions/decisions/ADR-006-feature-lifecycle.md)** — 7 lifecycle agents, 9 skills (with `bifrost-hr`), per-feature artifact set
+- **[ADR-007: Wiboo monorepo as v0 target](../instructions/decisions/ADR-007-wiboo-monorepo.md)** — single-stack target + operational acceptance criteria
+- **[ADR-008: Trajectory-context protocol](../instructions/decisions/ADR-008-trajectory-context-protocol.md)** — TRAJECTORY.md as locked-at-launch invariant store; mandatory first-read; acknowledgement chain
+- **[ADR-009: bifrost-hr — agents fixed at 7](../instructions/decisions/ADR-009-bifrost-hr.md)** — skills grow on demand via `bifrost-hr` (loaded by `@Intake` only)
+- **[ADR-010: Artifact set refinement](../instructions/decisions/ADR-010-artifact-set.md)** — 10-artifact set; HEALTH deprecated; AUTONOMY folds into STATE frontmatter
+
+### "I need to understand the receiving team's delivery standards"
+
+→ **[instructions/principles/delivery-standards.md](../instructions/principles/delivery-standards.md)** — Frontend-department-stated, non-negotiable: focused PRs, structured/documented delivery, Angular components
+
 ### "I need to work with Bifrost frontend codebase"
 
 → **`/knowledge/` folder** for complete Bifrost reference:
