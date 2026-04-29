@@ -29,6 +29,7 @@ import {
     renderSetupComplete,
     renderNextSteps,
 } from '../ui';
+import { parsePatientMd, validatePatientAnswers } from '../core/parser/patient';
 
 
 const FEATURE_SCOPES = Object.values(FeatureScope);
@@ -357,6 +358,23 @@ function buildTemplateMd(agentName: string): string {
     return `# ${agentName} Output\n\n> This file will be written by the ${agentName} agent when the workflow runs.\n`;
 }
 
+function buildProjectContextMd(featureName: string, destination: string): string {
+    return [
+        `# Project Context: ${featureName}`,
+        ``,
+        `**Target Application:** ${destination}`,
+        `**Stack Lock:** Angular 15, NgRx 14, TailwindCSS`,
+        ``,
+        `## Domain Knowledge`,
+        `This project is part of the Wiboo monorepo.`,
+        ``,
+        `## Architectural Principles`,
+        `- Atomic Design for components`,
+        `- Unidirectional data flow (NgRx)`,
+        `- Strict TypeScript`,
+    ].join('\n');
+}
+
 async function createBifrostDirectory(
     bifrostDir: string,
     featureName: string,
@@ -374,13 +392,15 @@ async function createBifrostDirectory(
 
     await Promise.all([
         fs.writeFile(path.join(bifrostDir, 'PATIENT.md'), buildPatientMd(featureName, featureDescription, businessValue, featureOwner, timeline, destination), 'utf8'),
-        fs.writeFile(path.join(bifrostDir, 'HEALTH.md'), buildHealthMd(), 'utf8'),
-        fs.writeFile(path.join(bifrostDir, 'AUTONOMY.md'), buildAutonomyMd(autonomyLevel), 'utf8'),
+        fs.writeFile(path.join(bifrostDir, 'STATE.md'), buildTemplateMd('@Conductor'), 'utf8'),
+        fs.writeFile(path.join(bifrostDir, 'TRAJECTORY.md'), buildTemplateMd('@Intake'), 'utf8'),
         fs.writeFile(path.join(bifrostDir, 'IMPACT.md'), buildTemplateMd('@Intake'), 'utf8'),
         fs.writeFile(path.join(bifrostDir, 'PLAN.md'), buildTemplateMd('@Planner'), 'utf8'),
         fs.writeFile(path.join(bifrostDir, 'CODE_REVIEW.md'), buildTemplateMd('@CodeGen'), 'utf8'),
         fs.writeFile(path.join(bifrostDir, 'QA_REPORT.md'), buildTemplateMd('@QA'), 'utf8'),
-        fs.writeFile(path.join(bifrostDir, 'HANDOFF.md'), buildTemplateMd('@Conductor'), 'utf8'),
+        fs.writeFile(path.join(bifrostDir, 'HANDOFF.md'), buildTemplateMd('@Reviewer'), 'utf8'),
+        fs.writeFile(path.join(bifrostDir, 'VITALS.md'), buildTemplateMd('@Monitor'), 'utf8'),
+        fs.writeFile(path.join(bifrostDir, 'PROJECT_CONTEXT.md'), buildProjectContextMd(featureName, destination), 'utf8'),
     ]);
 }
 
@@ -405,6 +425,10 @@ export default class Init extends Command {
         'skip-git': Flags.boolean({
             description: 'Skip git branch creation',
             default: false,
+        }),
+        patient: Flags.string({
+            char: 'f',
+            description: 'Path to PATIENT.md for headless ingestion',
         }),
     };
 
@@ -444,25 +468,45 @@ export default class Init extends Command {
         header('Step 3: Interview');
         blank();
 
-        const { destinationPath } = await prompt<{ destinationPath: string }>({
-            type: 'select',
-            name: 'destinationPath',
-            message: 'WHERE IS THE DESTINATION FOR THIS WORK?',
-            choices: [
-                '[A] Existing WiBOO Surface (Dashboard, App, etc.)',
-                '[B] New Standalone Project (From Zero)',
-                '[C] Landing Page / One-off (Fast-Track)',
-            ],
-        });
+        let answers: InterrogationAnswers | undefined;
 
-        let answers: InterrogationAnswers;
+        // --- HEADLESS CHECK ---
+        const patientPath = flags['patient'] || (await fs.pathExists(path.join(projectPath, 'PATIENT.md')) ? path.join(projectPath, 'PATIENT.md') : null);
 
-        if (destinationPath.startsWith('[A]')) {
-            answers = await promptPathA(projectPath);
-        } else if (destinationPath.startsWith('[B]')) {
-            answers = await promptPathB(projectPath);
-        } else {
-            answers = await promptPathC(projectPath);
+        if (patientPath) {
+            const patientContent = await fs.readFile(patientPath, 'utf8');
+            const parsedAnswers = parsePatientMd(patientContent);
+            const errors = validatePatientAnswers(parsedAnswers);
+
+            if (errors.length === 0) {
+                success(`Valid PATIENT.md detected at ${path.basename(patientPath)}`);
+                info('Switching to Headless Ingestion mode (Silent Setup)...');
+                answers = parsedAnswers as InterrogationAnswersA;
+            } else {
+                warn(`PATIENT.md found but incomplete: ${errors.join(', ')}`);
+                info('Falling back to manual interview...');
+            }
+        }
+
+        if (!answers) {
+            const { destinationPath } = await prompt<{ destinationPath: string }>({
+                type: 'select',
+                name: 'destinationPath',
+                message: 'WHERE IS THE DESTINATION FOR THIS WORK?',
+                choices: [
+                    '[A] Existing WiBOO Surface (Dashboard, App, etc.)',
+                    '[B] New Standalone Project (From Zero)',
+                    '[C] Landing Page / One-off (Fast-Track)',
+                ],
+            });
+
+            if (destinationPath.startsWith('[A]')) {
+                answers = await promptPathA(projectPath);
+            } else if (destinationPath.startsWith('[B]')) {
+                answers = await promptPathB(projectPath);
+            } else {
+                answers = await promptPathC(projectPath);
+            }
         }
 
         blank();
@@ -475,7 +519,7 @@ export default class Init extends Command {
 
         info(`Funcionalidade: ${featureName}`);
         info(`Descrição: ${(answers as { featureDescription: string }).featureDescription}`);
-        info(`Prazo Estimado: ${(answers as { timeline: string }).timeline}`);
+        info(`Prazo Estimado: ${(answers as { timeline: string }).timeline || 'N/A'}`);
 
         blank();
 
@@ -519,7 +563,7 @@ export default class Init extends Command {
             await writeHydrationFiles(bifrostDir, answers, config.bifrostFrameworkPath);
 
             const statePath = getStatePath(projectPath);
-            await initializeState(statePath, featureId, featureName);
+            await initializeState(statePath, featureId, featureName, config.defaultAutonomyLevel);
 
             setupSpinner.succeed('Project files created');
         } catch (err) {

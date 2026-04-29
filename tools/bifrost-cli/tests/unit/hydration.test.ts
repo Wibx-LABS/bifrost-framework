@@ -1,3 +1,4 @@
+import { describe, it, expect } from '@jest/globals';
 import { validateHydration, assertValidHydration } from '../../src/core/hydration/validator';
 import { AutonomyLevel, Hydration, ProjectPath } from '../../src/types';
 

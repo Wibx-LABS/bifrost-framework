@@ -26,7 +26,7 @@ The canonical per-feature artifact set is **10 artifacts**, refined from earlier
 
 | Artifact | Author | Purpose |
 |---|---|---|
-| `PATIENT.md` | Product (human) | Feature scope input |
+| `PATIENT.md` | Developer (human) | Feature scope input |
 | `TRAJECTORY.md` | `@Intake` | Locked invariants (per [ADR-008](ADR-008-trajectory-context-protocol.md)) |
 | `IMPACT.md` | `@Intake` | Scope analysis + bifrost-hr proposal slot |
 | `PLAN.md` | `@Planner` | Task breakdown w/ trajectory tagging |

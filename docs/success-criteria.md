@@ -59,7 +59,7 @@ These metrics measure whether Bifrost **works in actual feature development**.
 
 ### Feature Velocity
 
-**What it measures:** How fast can Product dev take a feature from scope to code ready for Backend review?
+**What it measures:** How fast can a Developer take a feature from scope to code ready for PR?
 
 | Metric | Before Bifrost | Target with Bifrost | How Measured |
 |--------|---|---|---|
@@ -113,15 +113,15 @@ These metrics measure whether Bifrost **solves the original problem**.
 Bottleneck: One Backend dev codes all features
 Feature start → complete: 2-3 weeks (waiting + coding + review + debug)
 Features per quarter: ~8-10
-Product blocked on Backend dev availability
+Developers bottlenecked by manual boilerplate and context gathering
 ```
 
 **Target after Bifrost:**
 ```
-Product team generates code independently
+Developers generate feature code with AI assistance
 Feature start → complete: 3-5 days (just review + merge)
 Features per quarter: ~30-40
-Product unblocked; Backend dev does infrastructure work
+High velocity delivery; focus on architectural excellence
 ```
 
 **Metrics:**
@@ -130,9 +130,9 @@ Product unblocked; Backend dev does infrastructure work
 | **Time-to-deploy** | 2-3 weeks | < 1 week | 2-3x improvement |
 | **Features/quarter** | 8-10 | 30-40 | 3-4x improvement |
 | **Backend dev utilization** | 80% feature code | 20% feature code | 60% shift to infra |
-| **Product team independence** | 0% (blocked on Backend) | 90% (Backend only reviews) | Major shift |
+| **Developer Velocity Boost** | 1x (Manual) | 4x (Agent-Assisted) | Major shift |
 
-**Success:** Product team velocity increases 3-4x. Backend dev unblocked.
+**Success:** Developer velocity increases 3-4x. Time-to-PR reduced to hours.
 
 ### Code Quality in Production
 
@@ -174,7 +174,7 @@ Product unblocked; Backend dev does infrastructure work
 
 ## Post-Pilot Validation (Gate Check)
 
-Before rolling out to all Product, validate 3 core assumptions:
+Before full rollout, validate 3 core assumptions:
 
 ### Assumption 1: AI-Generated Code Quality
 
@@ -272,7 +272,7 @@ ACTION ITEMS:
 | **Assumption 2 validated** | Week 7 | Context consistency | > 90% |
 | **Assumption 3 validated** | Week 7 | Revision cycles | < 6 iterations |
 | **Full rollout approved** | Week 8 | All assumptions pass | Go/no-go decision |
-| **30% team trained** | Week 9 | Product dev trained | 1-hour workshop |
+| **30% team trained** | Week 9 | Developer team trained | 1-hour workshop |
 | **50% features on Bifrost** | Week 10 | Feature adoption | > 50% of new work |
 | **100% features on Bifrost** | Week 12 | Full adoption | All new features |
 | **3-4x velocity achieved** | Week 16 | Sustained improvement | Metrics show trend |
@@ -300,20 +300,20 @@ RED FLAG: Agent returns unfinished work (missing files, etc.)
 → Action: Review agent template. Something is truncated/cut off.
 
 RED FLAG: Velocity trending DOWN instead of up
-→ Action: Interview Product dev. Something is blocking them.
+→ Action: Interview Developers. Something is blocking the workflow.
 
 RED FLAG: >= 3 agents fail on same project
 → Action: Project context hydration failed. Re-run bifrost-init.
 
 RED FLAG: "bifrost-metrics shows 0 features this month"
-→ Action: Product team didn't use Bifrost. Adoption issue.
+→ Action: Adoption issue. Developers opting for manual coding.
 ```
 
 ---
 
 ## See Also
 
-- [04-IMPLEMENTATION-PLAN.md](04-IMPLEMENTATION-PLAN.md) — How to build the framework
-- [06-STRATEGY.md](06-STRATEGY.md) — Business case + ROI
+- [implementation-plan-PLAN.md](implementation-plan-PLAN.md) — How to build the framework
+- [strategy.md](strategy.md) — Business case + ROI
 - **[Technical Roadmap & Visual Architecture.md](../Technical%20Roadmap%20%26%20Visual%20Architecture.md)** — Original detailed source (success definition, risks)
 - **[Operation Bifrost.md](../Operation%20Bifrost.md)** — Original detailed source (business metrics, ROI)

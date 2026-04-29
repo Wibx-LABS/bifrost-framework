@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import * as path from 'path';
 import * as fs from 'fs-extra';
 import * as os from 'os';
@@ -147,11 +148,13 @@ describe('Full workflow: init → start → status → deliver', () => {
             needsApi: true,
             featureName: 'Test Feature',
             featureDescription: 'A test feature for integration testing',
+            businessValue: 'Test value',
+            featureOwner: 'Test owner',
             timeline: '1 week',
         };
 
         const hydration = await buildHydration(answers, EMPTY_KNOWLEDGE, tmpDir);
-        await writeHydrationFiles(bifrostDir, hydration, answers, EMPTY_KNOWLEDGE);
+        await writeHydrationFiles(bifrostDir, answers, tmpDir);
 
         expect(await fs.pathExists(path.join(bifrostDir, 'hydration.json'))).toBe(true);
         expect(await fs.pathExists(path.join(bifrostDir, 'interrogation.md'))).toBe(true);
