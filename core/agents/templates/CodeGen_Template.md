@@ -375,7 +375,7 @@ For each Hard Stop: write the block, update STATE.md Blockers, surface to user, 
 Filled by `bifrost-init` when this template hydrates to `.bifrost/agents/CodeGen_HYDRATED.md`:
 
 - `{{NAMING_CONVENTIONS}}` — pulled from `knowledge/NAMING_CONVENTIONS.md`. The full naming + ESLint reference. Used to generate code that passes lint on first write.
-- `{{CODE_STANDARDS}}` — also from `knowledge/NAMING_CONVENTIONS.md`. Same content; the two keys exist for compatibility with future split if standards diverge from naming.
+- `{{NAMING_CONVENTIONS}}` — also from `knowledge/NAMING_CONVENTIONS.md`. Same content; the two keys exist for compatibility with future split if standards diverge from naming.
 - `{{TESTING_RULES}}` — pulled from `knowledge/FRONTEND_REPOSITORY_MANUAL.md` §15. Test setup files, mock locations, run commands.
 - `{{ARCHITECTURE_GRAPH}}` — pulled from `knowledge/graph.json` when seeded; until then, the placeholder explains "graph.json not yet seeded; use lookup-before-invention via the markdown knowledge files + libs/commonlib code."
 

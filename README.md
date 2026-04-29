@@ -23,7 +23,7 @@ Bifrost is a specialized framework that orchestrates intelligent AI agents to au
 │                        BIFROST FRAMEWORK ECOSYSTEM                    │
 └───────────────────────────────────────────────────────────────────────┘
 
-                                 PRODUCT TEAM
+                                 DEVELOPER TEAM
                                        │
                     ┌──────────────────┼──────────────────┐
                     │                  │                  │
@@ -58,6 +58,7 @@ Bifrost is a specialized framework that orchestrates intelligent AI agents to au
 │                              │            │                              │
 │  Per-Feature Artifacts:      │            │        knowledge/            │
 │  • PATIENT.md (scope)        │            │                              │
+│  • TRAJECTORY.md (invariants)│            │                              │
 │  • IMPACT.md (changes)       │            │  • API_CONTRACTS.md          │
 │  • PLAN.md (tasks)           │            │  • COMPONENT_LIBRARY.md      │
 │  • STATE.md (history)        │            │  • NAMING_CONVENTIONS.md     │
@@ -72,8 +73,8 @@ Bifrost is a specialized framework that orchestrates intelligent AI agents to au
 A feature goes through a structured pipeline managed by specialized agents:
 
 1.  **Initialize**: `bifrost init` sets up the project structure and hydrates agents with domain knowledge.
-2.  **Intake**: `@Intake` analyzes the feature scope and produces a detailed impact report (`IMPACT.md`).
-3.  **Plan**: `@Planner` breaks the requirements into 5-10 concrete technical tasks documented in `PLAN.md`.
+2.  **Intake**: `@Intake` analyzes the feature scope (`PATIENT.md`), locks the invariants (`TRAJECTORY.md`), and produces an impact report (`IMPACT.md`).
+3.  **Plan**: `@Planner` breaks the requirements into concrete technical tasks documented in `PLAN.md`.
 4.  **Build**: `@CodeGen` generates source code following Bifrost standards and architectural patterns.
 5.  **QA**: `@QA` validates the implementation, running tests and finding edge cases.
 6.  **Deliver**: `@Reviewer` prepares the handoff, generates `HANDOFF.md`, and creates the GitHub PR.
@@ -84,7 +85,7 @@ A feature goes through a structured pipeline managed by specialized agents:
 
 | Command           | Action                              | Output                             |
 | :---------------- | :---------------------------------- | :--------------------------------- |
-| `bifrost init`    | Interactive setup for new features  | `.bifrost/` structure & `STATE.md` |
+| `bifrost init`    | Ingests PATIENT.md (Headless) or Interactive setup | `.bifrost/` structure & `STATE.md` |
 | `bifrost start`   | Begins automated analysis (@Intake) | `IMPACT.md` & updated state        |
 | `bifrost status`  | Displays current pipeline progress  | Formatted status box in terminal   |
 | `bifrost review`  | Interactive artifact approval       | Finalized task list & code review  |

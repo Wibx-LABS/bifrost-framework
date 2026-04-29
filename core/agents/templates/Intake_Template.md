@@ -128,7 +128,7 @@ Use `core/templates/TRAJECTORY.md` (already hydrated to `.bifrost/TRAJECTORY.md`
 
 **§1 Feature identity** — feature name, one-paragraph scope statement (paraphrase IMPACT §1), in-scope binary list, out-of-scope binary list. The binary lists are CONTRACTS — what's listed in/out is exactly what's in/out. Don't hedge with "and similar things." Be explicit.
 
-**§2 Hard constraints** — start from `{{TECH_STACK_LOCK}}`, `{{SECURITY_BOUNDARIES_DEFAULT}}`, `{{PERF_BUDGETS_DEFAULT}}` (already hydrated). Append feature-specific entries:
+**§2 Hard constraints** — start from `{{TECH_STACK}}`, `{{SECURITY_BOUNDARIES_DEFAULT}}`, `{{PERF_BUDGETS_DEFAULT}}` (already hydrated). Append feature-specific entries:
 - Tech stack: any feature-specific stack constraints beyond the project default.
 - Security: any auth/data-classification specifics from PATIENT §4.
 - Performance: feature-specific budgets (LCP, action latency, bundle delta).
@@ -253,7 +253,7 @@ The following will be filled in by `bifrost-init` when this template gets hydrat
 - `{{TECH_STACK}}` — pulled from `knowledge/TECH_STACK.md`. The version lock you reference in TRAJECTORY §2.
 - `{{API_BASE_URL}}` — pulled from `knowledge/API_CONTRACTS.md` when seeded; until then, the endpoint factory in `libs/commonlib/src/lib/constants/api.ts`.
 - `{{COMPONENT_LIBRARY}}` — pulled from `knowledge/COMPONENT_LIBRARY.md`. The catalogue of `app-*` components.
-- `{{KNOWN_GOTCHAS}}` — pulled from `knowledge/GOTCHAS.md`. The known issues you reference when populating TRAJECTORY §5 Prior incidents.
+- `{{GOTCHAS}}` — pulled from `knowledge/GOTCHAS.md`. The known issues you reference when populating TRAJECTORY §5 Prior incidents.
 
 ---
 

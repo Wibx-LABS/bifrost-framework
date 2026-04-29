@@ -55,49 +55,42 @@ Feature shipped
 
 ## What Bifrost Solves
 
-### After Bifrost
+### After Bifrost (Developer-First)
 
 ```
-Product (scope → Claude Code)
+Product (PATIENT.md)
     ↓
-@Intake agent (analyzes impact)
+Developer (bifrost init --patient)
     ↓
-@Planner agent (breaks into tasks)
+@Intake agent (Impact Analysis)
     ↓
-@CodeGen agent (writes code)
+@Planner agent (Task Breakdown)
     ↓
-@QA agent (tests)
+@CodeGen agent (Automated Coding)
     ↓
-@Conductor agent (tracks state)
+@QA agent (Automated Validation)
     ↓
-HANDOFF to Backend dev (reviews, merges)
+Developer (Final Review + PR)
     ↓
 Feature shipped
 ```
 
 **New workflow:**
-- Product team generates 100% of frontend code independently
-- Backend dev reviews + merges only
-- Code is pre-validated: security audited, tested, builds clean, all endpoints verified
-- Canonical documentation is source of truth
-- All agents read from it → consistency enforced by context, not discipline
-- Code is versioned, audited, traced
-- Every feature has full log of what agents ran + found + fixed
+- **Zero-Friction Setup**: Developers ingest Product specs instantly via Headless Mode.
+- **AI-Augmented Impact**: @Intake identifies architectural collision points before a single line is written.
+- **Pre-PR Validation**: Automated @QA loops ensure the code meets standards *before* human review.
+- **Token Efficiency**: Graph-first queries lower the cost of large-scale repo analysis.
 
 ### New Metrics (Target)
 
-| Metric | Current | Target | Improvement |
+| Metric | Before Bifrost | Target | Improvement |
 |--------|---------|--------|------------|
+| Setup & Scaffolding | 2-4 hours | < 5 minutes | **Zero-Friction** |
 | Feature time-to-deploy | 2-3 weeks | < 1 week | 2-3x faster |
-| Time: scope to code ready | 2-3 weeks | 3-5 days | **4-6x faster** |
-| Backend dev time on coding | 80% | 10% | **70% shift** |
-| Backend dev time on review | 20% | 20% | Stable |
-| Backend dev time on infra | 0% | 70% | **Unlocked** |
-| Code review time | 1-2 days | 4-8 hours | 2-3x faster |
-| Code rework rate | 60-70% | < 10% | **6-7x better** |
-| Product team independence | 0% | 90% | **Game changer** |
-| Features per quarter | 8-10 | 30-40 | **3-4x more** |
-| Single source of truth | None | Knowledge layer (knowledge/) | **Standardized** |
+| Token Usage per Feature | High (File scans) | Low (Graph-first) | **40-60% cheaper** |
+| Dev time on boilerplate | 70% | 10% | **Unlocked** |
+| Code rework rate | 60-70% | < 5% | **10x better** |
+| Feature per Quarter | 8-10 | 30-40 | **3-4x more** |
 
 ---
 
@@ -319,21 +312,11 @@ NOT a 2-week prototype. Before scaling to all Product staff, validate:
 
 ### For CTO
 
-> Bifrost is a time-boxed, low-risk test of whether Product can generate production-ready code with AI guidance. If it works, we free up one Backend dev for infrastructure + optimization without hiring. If it doesn't, we lose 8 weeks and iterate. Framework cost: ~250 engineering hours. Tool cost: already budgeted. Kill switch: clear (if Backend rework > 20%, stop scaling).
+> Bifrost is a productivity multiplier for our Senior Developers. By automating the boilerplate, setup, and first-pass QA, we allow our core team to focus on complex architecture and business logic. It's about increasing **Developer Velocity** by 3-4x while lowering operational costs (tokens) via graph-first reasoning.
 
-**Ask:** Approve framework build + pilot. Allocate 1-2 engineers for 8 weeks.
+### For Senior Developers
 
-### For Product Lead
-
-> Bifrost gives Product team independence. Stop waiting for Backend dev's calendar. Start features on your timeline. Code reaches Backend ready to review + merge, not to rewrite. Feature velocity 3-4x faster. Pilot tests if it works; full rollout only if validated.
-
-**Ask:** Allocate 2-3 Product dev for pilot (week 6-7). Willing to try?
-
-### For Backend Lead
-
-> Bifrost shifts you from "coder" to "reviewer" role. Instead of writing 80% of features, you review 100%. Code is pre-validated (security audited, tested, standards-checked). Your job becomes: verify correctness + merge. You gain 12-15 hours/week for infrastructure, performance, real Backend work.
-
-**Ask:** Seed knowledge/ directory with Graphify output (existing code patterns). Willing?
+> Bifrost isn't here to replace your code; it's here to eliminate the friction *around* your code. Ingest Product requirements instantly, automate the boring setup, and let the agents handle the repetitive QA loops. You stay in control of the PR, but Bifrost handles the heavy lifting of initialization and standards compliance.
 
 ---
 
@@ -449,6 +432,6 @@ Bifrost tests whether Product can generate production-ready frontend code using 
 
 ## See Also
 
-- [04-IMPLEMENTATION-PLAN.md](04-IMPLEMENTATION-PLAN.md) — How to build it
-- [05-SUCCESS-CRITERIA.md](05-SUCCESS-CRITERIA.md) — How to measure it
+- [implementation-plan-PLAN.md](implementation-plan-PLAN.md) — How to build it
+- [success-criteria-CRITERIA.md](success-criteria-CRITERIA.md) — How to measure it
 - **[Operation Bifrost.md](../Operation%20Bifrost.md)** — Original detailed source (full pitch + assumptions)

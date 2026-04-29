@@ -4,6 +4,7 @@ import matter from 'gray-matter';
 import {
     AgentName,
     ArtifactEntry,
+    AutonomyLevel,
     BifrostState,
     BifrostStatus,
     TimelineEntry,
@@ -22,6 +23,7 @@ function renderState(state: BifrostState): string {
         `id: ${state.id}`,
         `feature: ${state.feature}`,
         `status: ${state.status}`,
+        `autonomy: ${state.autonomy}`,
         `created: ${state.created}`,
         `version: ${state.version}`,
         '---',
@@ -135,6 +137,7 @@ function parseState(raw: string): BifrostState {
         id: String(data['id'] ?? ''),
         feature: String(data['feature'] ?? ''),
         status: (data['status'] as BifrostStatus) ?? BifrostStatus.INITIALIZED,
+        autonomy: (data['autonomy'] as AutonomyLevel) ?? AutonomyLevel.TASK_GATED,
         created: String(data['created'] ?? nowIso()),
         version: String(data['version'] ?? nowIso()),
         timeline,
@@ -149,12 +152,14 @@ export async function initializeState(
     statePath: string,
     featureId: string,
     featureName: string,
+    autonomyLevel: AutonomyLevel = AutonomyLevel.TASK_GATED,
 ): Promise<BifrostState> {
     const now = nowIso();
     const state: BifrostState = {
         id: featureId,
         feature: featureName,
         status: BifrostStatus.INITIALIZED,
+        autonomy: autonomyLevel,
         created: now,
         version: now,
         timeline: [{ timestamp: now, message: 'Feature initialized' }],

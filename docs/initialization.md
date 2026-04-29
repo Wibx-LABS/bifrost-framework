@@ -13,21 +13,38 @@ How the `bifrost init` command transforms a blank folder into a ready-to-work fe
 ## What Is Initialization?
 
 `bifrost init` is a single CLI command that:
-1. Asks you 3-5 questions about your feature
-2. Sets up `.bifrost/` directory with all templates
-3. Hydrates agents with your project context
-4. Installs skills into Claude Code + Antigravity
-5. Creates git branch + commit
-6. Prints next steps
+1. **Detects Product Specs**: Parses `PATIENT.md` automatically (Headless Mode)
+2. **Asks Questions**: (Fallback) If no spec exists, asks 3-5 questions
+3. **Sets up `.bifrost/`**: Creates directory structure with all templates
+4. **Hydrates Agents**: Injects project context into templates
+5. **Installs Skills**: Loads protocols into Claude Code + Antigravity
+6. **Creates Git Branch**: Automates branch creation + initial commit
 
-**Time:** ~2-3 minutes  
+**Time:** ~2 seconds (Headless) / ~2 minutes (Manual)  
 **Result:** Feature ready to start coding
 
 ---
 
-## The Interrogation (Interview Process)
+The CLI first searches for a `PATIENT.md` file (or accepts one via `--patient`).
 
-The CLI asks: **"Where is this work going?"** and **"What are we building?"**
+### Path 0: Headless Ingestion (Silent Setup)
+
+This is the **preferred developer path**. If a Product-authored `PATIENT.md` is detected, the CLI:
+1. **Parses** the Markdown file for metadata (Feature Name, Target App, Author, Deadlines).
+2. **Validates** that all required fields are present (Pre-flight Check).
+3. **Skips** all interview questions.
+4. **Hydrates** agents immediately.
+
+**Command:**
+```bash
+bifrost init --patient ./PATIENT.md
+```
+
+---
+
+## The Interrogation (Manual Interview)
+
+If no patient file is found, the CLI asks: **"Where is this work going?"** and **"What are we building?"**
 
 ### Path A: Existing Bifrost Surface (Standard Case)
 
@@ -120,17 +137,18 @@ Use this for quick projects where you provide your own instructions.
 ```
 .bifrost/
 ├── PATIENT.md              (scope template)
-├── HEALTH.md               (quality gates)
-├── AUTONOMY.md             (autonomy level = Task-Gated by default)
+├── TRAJECTORY.md           (locked invariants per ADR-008)
 ├── IMPACT.md               (template, will be filled by @Intake)
 ├── PLAN.md                 (template, will be filled by @Planner)
-├── STATE.md                (initialized to "admitted" status)
+├── STATE.md                (initialized to "admitted" status; autonomy in frontmatter)
 ├── agents/
 │   ├── Intake_HYDRATED.md
 │   ├── Planner_HYDRATED.md
 │   ├── CodeGen_HYDRATED.md
 │   ├── QA_HYDRATED.md
-│   └── Conductor_HYDRATED.md
+│   ├── Conductor_HYDRATED.md
+│   ├── Monitor_HYDRATED.md
+│   └── Reviewer_HYDRATED.md
 ├── skills/
 │   ├── bifrost-system-context/SKILL.md
 │   ├── bifrost-code-standards/SKILL.md
@@ -139,7 +157,8 @@ Use this for quick projects where you provide your own instructions.
 │   ├── bifrost-code-review/SKILL.md
 │   ├── bifrost-qa-validator/SKILL.md
 │   ├── bifrost-graphify-ref/SKILL.md
-│   └── bifrost-state-management/SKILL.md
+│   ├── bifrost-state-management/SKILL.md
+│   └── bifrost-hr/SKILL.md
 └── PROJECT_CONTEXT.md      (per-project system prompt)
 ```
 
@@ -266,7 +285,7 @@ See docs/QUICKSTART.md for full workflow.
 ```
 ┌─ SELECT DESTINATION ────────────────────────────────┐
 │                                                     │
-│  Which Bifrost application are we targeting?          │
+│  Which Bifrost application are we targeting?        │
 │                                                     │
 │  > Merchant Platform (Dashboard)                    │
 │    User Profile & Security (Account)                │
@@ -390,25 +409,26 @@ Known gotchas:
 1. **Edit `.bifrost/PATIENT.md`**  
    Write your feature scope. Be specific about requirements, constraints, edge cases.
 
-2. **Open Claude Code or Antigravity** in the project folder
+2. **Create `.bifrost/TRAJECTORY.md`**  
+   @Intake produces this during /bifrost:start. It locks your design decisions.
 
-3. **Run `/bifrost:start`**  
-   @Intake reads PATIENT.md, queries architecture graph, produces IMPACT.md
+3. **Open Claude Code or Antigravity** in the project folder
 
-4. **Review IMPACT.md**  
-   Does the scope impact analysis look right? Any surprises?
+4. **Run `/bifrost:start`**  
+   @Intake reads PATIENT.md, queries architecture graph, produces IMPACT.md and TRAJECTORY.md
 
-5. **Approve and proceed**  
+5. **Review IMPACT.md and TRAJECTORY.md**  
+   Does the scope impact analysis look right? Are the design decisions clear?
+
+6. **Approve and proceed**  
    When you're ready, run `/bifrost:plan`
 
-See [01-ARCHITECTURE.md](01-ARCHITECTURE.md) for the full workflow after initialization.
+See [architecture.md](architecture.md) for the full workflow after initialization.
 
 ---
 
 ## See Also
 
-- [01-ARCHITECTURE.md](01-ARCHITECTURE.md) — Workflow after init is complete
-- [03-AGENTS-AND-SKILLS.md](03-AGENTS-AND-SKILLS.md) — Details on what each agent/skill does
-- **[Bifrost CLI Plan.md](../Bifrost%20CLI%20Plan.md)** — Original detailed source (CLI architecture)
-- **[bifrost CLI layout.md](../bifrost%20CLI%20layout.md)** — Original detailed source (UI mockups)
-- **[Framework Specification.md](../Framework%20Specification.md)** — Original detailed source (hydration system)
+- [architecture.md](architecture.md) — Workflow after init is complete
+- [agents-and-skills.md](agents-and-skills.md) — Details on what each agent/skill does
+- [decisions/ADR-008-trajectory-context-protocol.md](decisions/ADR-008-trajectory-context-protocol.md) — TRAJECTORY.md specification

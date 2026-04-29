@@ -150,15 +150,15 @@ If you don't know which agent you are: look at the slash command the user just t
 
 Every Bifrost agent loads `bifrost-system-context` (this file). The other skills load by role. Read the skill files for any skill in your row. The skill library currently has **9 entries** (8 original + `bifrost-hr` per ADR-009) and grows on demand when `@Intake` invokes `bifrost-hr` to bootstrap a new skill.
 
-| Agent | system-context | code-standards | api-integration | component-gen | code-review | qa-validator | graphify-ref | state-management | hr |
-|---|---|---|---|---|---|---|---|---|---|
-| `@Intake` | ✓ | – | – | – | – | – | ✓ | – | ✓ |
-| `@Planner` | ✓ | ✓ | – | – | – | – | ✓ | – | – |
-| `@CodeGen` | ✓ | ✓ | ✓ | ✓ | ✓ | – | ✓ | ✓ | – |
-| `@QA` | ✓ | ✓ | ✓ | – | – | ✓ | ✓ | – | – |
-| `@Reviewer` | ✓ | ✓ | ✓ | ✓ | – | – | ✓ | ✓ | – |
-| `@Conductor` | ✓ | – | – | – | – | – | – | ✓ | – |
-| `@Monitor` | ✓ | ✓ | – | – | – | – | – | ✓ | – |
+| Agent | system-context | code-standards | api-integration | component-gen | code-review | qa-validator | graphify-ref | state-management | hr | efficiency |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `@Intake` | ✓ | – | – | – | – | – | ✓ | – | ✓ | ✓ |
+| `@Planner` | ✓ | ✓ | – | – | – | – | ✓ | – | – | ✓ |
+| `@CodeGen` | ✓ | ✓ | ✓ | ✓ | ✓ | – | ✓ | ✓ | – | ✓ |
+| `@QA` | ✓ | ✓ | ✓ | – | – | ✓ | ✓ | – | – | ✓ |
+| `@Reviewer` | ✓ | ✓ | ✓ | ✓ | – | – | ✓ | ✓ | – | ✓ |
+| `@Conductor` | ✓ | – | – | – | – | – | – | ✓ | – | ✓ |
+| `@Monitor` | ✓ | ✓ | – | – | – | – | – | ✓ | – | ✓ |
 
 > *Matrix correction (2026-04-28).* `@CodeGen` now loads `bifrost-state-management` because that skill's Section B carries Wiboo's NgRx code patterns (actions, reducers, selectors, effects, immutable updates, the takeUntil/async-pipe subscription discipline). The original framework spec was internally inconsistent — its table omitted this cell while its prose ("Used by @CodeGen, @Reviewer") included it. Aligned to the prose, which matches what's actually in the skill body.
 
@@ -172,6 +172,7 @@ What each peer skill carries (full content in `core/skills/<skill-name>/SKILL.md
 - **`bifrost-graphify-ref`** — how to query the knowledge layer ("what APIs exist for search?", "what pattern do other features use?"), `graph.json` schema (when seeded), the five reference files in `knowledge/`.
 - **`bifrost-state-management`** — STATE.md format and update protocol, NgRx patterns (actions, reducers, selectors, effects), immutable updates.
 - **`bifrost-hr`** — gap detection + skill bootstrap. Loaded by `@Intake` only; runs at `/bifrost:start` after PATIENT.md is read but before TRAJECTORY locks. Walks the extend-or-fork decision when a domain gap is detected, drafts the new skill, Hard Stops for user approval, commits permanently. See "Gap detection" section above and ADR-009.
+- **`bifrost-efficiency`** — developer productivity benchmarks, token usage discipline, speed-to-implementation standards, and "The Gold" (product-to-dev transfer) fidelity.
 
 ---
 

@@ -6,7 +6,7 @@ topic: bifrost/agents-skills
 
 # BIFROST Agents & Skills Reference
 
-Complete specification of all 7 agents and all 8 skills. This is the **single source of truth** for what each does. **Source materials:** Technical Roadmap & Visual Architecture, Framework Specification.
+Complete specification of all 7 agents and all 9 skills. This is the **single source of truth** for what each does. **Source materials:** Technical Roadmap & Visual Architecture, Framework Specification, ADR-006, ADR-009.
 
 ---
 
@@ -23,7 +23,7 @@ Each agent is a markdown template file that executes a specific job in the workf
 **When it runs:** Feature kickoff (`/bifrost:start`)
 
 **What it reads:**
-- `.bifrost/PATIENT.md` (feature scope from Product)
+- `.bifrost/PATIENT.md` (feature scope / admission record)
 - Architecture Graph (existing APIs, components, patterns)
 - `PROJECT_CONTEXT.md` (project-specific system prompt)
 
@@ -33,10 +33,12 @@ Each agent is a markdown template file that executes a specific job in the workf
 3. Identifies potential impact: "What parts of the system change?"
 4. Flags unknowns: "What needs clarification?"
 5. Validates assumptions: "Are the constraints realistic?"
+6. Produces TRAJECTORY.md: Locks design decisions and constraints (per ADR-008)
 
 **What it produces:**
+- `TRAJECTORY.md` — Locked-at-launch invariant store (per ADR-008)
 - `IMPACT.md` — Detailed scope impact analysis
-- Approval gate: Product must review + approve before proceeding
+- Approval gate: Developer must review + approve before proceeding
 
 **Success looks like:**
 ```
@@ -48,6 +50,14 @@ IMPACT.md contains:
 ✓ Identified edge cases
 ✓ Dependency list (what else must be done first?)
 ✓ Risk flags (if any)
+
+TRAJECTORY.md contains:
+✓ Feature identity (name, author, deadline)
+✓ Hard constraints (technical, regulatory, business)
+✓ Acceptance criteria (clear definition of "done")
+✓ Architectural decisions (patterns chosen, why)
+✓ External context (APIs, dependencies, gotchas)
+✓ Amendments log (append-only record of changes)
 ```
 
 ---
@@ -60,6 +70,7 @@ IMPACT.md contains:
 
 **What it reads:**
 - `.bifrost/PATIENT.md` (original scope)
+- `.bifrost/TRAJECTORY.md` (locked constraints and decisions)
 - `.bifrost/IMPACT.md` (scope analysis from @Intake)
 - Architecture Graph (function signatures, patterns)
 - `bifrost-code-standards` skill
@@ -74,7 +85,7 @@ IMPACT.md contains:
 
 **What it produces:**
 - `PLAN.md` — Detailed task breakdown with estimated time per task
-- Approval gate: Product must review + approve before coding starts
+- Approval gate: Developer must review + approve before coding starts
 
 **Success looks like:**
 ```
@@ -121,6 +132,7 @@ PLAN.md contains:
 
 **What it reads:**
 - `.bifrost/PLAN.md` (task breakdown)
+- `.bifrost/TRAJECTORY.md` (locked constraints)
 - `bifrost-system-context` skill (master prompt)
 - `bifrost-code-standards` skill (naming, structure, patterns)
 - `bifrost-api-integration` skill (how to call APIs)
@@ -177,6 +189,7 @@ Test Results:
 - Generated source code
 - `bifrost-qa-validator` skill (test scenarios, patterns)
 - `.bifrost/PLAN.md` (what was supposed to be built)
+- `.bifrost/TRAJECTORY.md` (constraints that must be respected)
 - Architecture Graph (API contracts to validate against)
 - `CODE_REVIEW.md` (what @CodeGen claims)
 
@@ -192,7 +205,7 @@ Test Results:
 
 **What it produces:**
 - `QA_REPORT.md` — Test results + findings
-- Pass/Fail gate: If fail, hard stops. Product must fix issues.
+- Pass/Fail gate: If fail, hard stops. Developer must fix issues.
 
 **Success looks like:**
 ```
@@ -237,6 +250,7 @@ Issues Found:
 
 **What it reads:**
 - `.bifrost/STATE.md` (current execution state)
+- `.bifrost/TRAJECTORY.md` (locked constraints)
 - All other artifacts (PATIENT, PLAN, CODE_REVIEW, QA_REPORT)
 - File system (what files were actually changed?)
 - Git history (what commits were made?)
@@ -247,11 +261,11 @@ Issues Found:
 3. After @CodeGen completes: Updates STATE.md with "code generated"
 4. After @QA completes: Updates STATE.md with "QA passed"
 5. Before delivery: Finalizes STATE.md with complete record
+6. Enforces autonomy: Respects STATE.md frontmatter `autonomy:` field
 
 **What it produces:**
 - Updated `STATE.md` (append-only log of what happened)
 - Decision: Can we proceed to next phase? Any blockers?
-- Autonomy enforcement: Respects AUTONOMY.md level
 
 **Success looks like:**
 ```
@@ -260,14 +274,16 @@ STATE.md shows:
 Feature: Add Search Portal
 Admitted: 2026-04-27 09:00 UTC
 Status: qa_passed
+Autonomy: Task-Gated
 
 Phase 1: Analysis
 - [x] @Intake analyzed scope → IMPACT.md (09:15)
-- [x] Product approved impact (09:30)
+- [x] @Intake locked trajectory → TRAJECTORY.md (09:15)
+- [x] Developer approved impact (09:30)
 
 Phase 2: Planning
 - [x] @Planner broke into tasks → PLAN.md (10:00)
-- [x] Product approved plan (10:15)
+- [x] Developer approved plan (10:15)
 
 Phase 3: Development
 - [x] @CodeGen generated code (11:45)
@@ -294,6 +310,7 @@ Commits:
 
 **What it reads:**
 - `.bifrost/` directory structure
+- `.bifrost/TRAJECTORY.md` (locked constraints)
 - All artifact files (PATIENT, PLAN, STATE, etc.)
 - File system (what actually exists in source tree?)
 - Git changes (what was actually committed?)
@@ -302,8 +319,9 @@ Commits:
 1. Checks: "Does everything in PLAN.md exist in source tree?"
 2. Checks: "Are all files referenced in STATE.md actually tracked?"
 3. Checks: "Have any unexpected files been modified?"
-4. Detects drift: "Did something change that STATE.md doesn't know about?"
-5. Alerts: "Here's what changed outside the plan"
+4. Checks: "Is anything violating TRAJECTORY constraints?"
+5. Detects drift: "Did something change that STATE.md doesn't know about?"
+6. Alerts: "Here's what changed outside the plan"
 
 **What it produces:**
 - `VITALS.md` — Health check report
@@ -322,6 +340,11 @@ STATE.md Validation:
 ✓ All tasks marked complete exist in code
 ✓ All commits listed exist in git
 ✓ Timestamps are sequential
+
+Trajectory Validation:
+✓ No constraints violated
+✓ Hard constraints still hold
+✓ Design decisions still enforced
 
 File Validation:
 ✓ All files from PLAN.md exist
@@ -346,7 +369,7 @@ Issues:
 **When it runs:** Before delivery (`/bifrost:deliver`)
 
 **What it reads:**
-- All artifacts (PATIENT, IMPACT, PLAN, STATE, CODE_REVIEW, QA_REPORT, VITALS)
+- All artifacts (PATIENT, TRAJECTORY, IMPACT, PLAN, STATE, CODE_REVIEW, QA_REPORT, VITALS)
 - Generated source code
 - Git history
 - Architecture Graph (to verify API alignment)
@@ -391,6 +414,11 @@ HANDOFF.md shows:
   - search.reducer.ts
   - search.selectors.ts
 
+## Trajectory Validation
+✓ All hard constraints met
+✓ All acceptance criteria satisfied
+✓ Design decisions documented
+
 ## API Validation
 ✓ All endpoints match API_CONTRACTS.md
 ✓ Error responses follow standard format
@@ -407,14 +435,13 @@ HANDOFF.md shows:
 - [ ] Code follows naming conventions
 - [ ] API calls are correct
 - [ ] Tests are comprehensive
+- [ ] All trajectory constraints met
 - [ ] Merge and deploy
 ```
 
 ---
 
----
-
-## THE 8 SKILLS (Protocols)
+## THE 9 SKILLS (Protocols)
 
 Each skill is a repeatable protocol file. Skills are **always loaded** into Claude Code + Antigravity. They answer: "What rules do I follow?"
 
@@ -427,16 +454,17 @@ Each skill is a repeatable protocol file. Skills are **always loaded** into Clau
 **What it contains:**
 - Master system prompt
 - "You are in Bifrost framework context"
-- "Read STATE.md to understand current progress"
+- "Read STATE.md and TRAJECTORY.md to understand current progress"
 - "Follow all rules in other skills"
 - High-level mission statement
 
-**Used by:** @Intake, @Planner, @CodeGen, @QA (all agents)
+**Used by:** @Intake, @Planner, @CodeGen, @QA, @Monitor (all agents)
 
 **Example rule:**
 ```
 You are working within the Bifrost framework.
 Before any decision, check STATE.md for current status.
+Before any implementation, check TRAJECTORY.md for hard constraints.
 If STATE.md says "Task 3 blocked on missing API", 
 respect that block — don't proceed until unblocked.
 ```
@@ -494,7 +522,7 @@ Style:
 - Retry logic
 - Response transformation (adapters)
 
-**Used by:** @CodeGen, @QA (validation)
+**Used by:** @CodeGen, @QA (validation), @Reviewer
 
 **Example rules:**
 ```
@@ -537,7 +565,7 @@ Error handling:
 - Accessibility requirements
 - Testing patterns for components
 
-**Used by:** @CodeGen
+**Used by:** @CodeGen, @Reviewer
 
 **Example rules:**
 ```
@@ -664,7 +692,7 @@ Accessibility:
 - How to discover existing patterns
 - How to validate against the graph
 
-**Used by:** @CodeGen, @Intake
+**Used by:** @CodeGen, @Intake, @Reviewer
 
 **Example usage:**
 ```
@@ -699,8 +727,9 @@ Answer from COMPONENT_LIBRARY.md:
 - When to update (after every step)
 - How to timestamp (ISO 8601)
 - How to mark completion (checkboxes)
+- Autonomy field (Task-Gated, Phase-Gated, Full)
 
-**Used by:** @Conductor
+**Used by:** @Conductor, @Monitor
 
 **Example structure:**
 ```yaml
@@ -715,7 +744,7 @@ Phases:
       - name: "@Intake analyzes scope"
         status: "completed"
         timestamp: 2026-04-27T09:15:00Z
-      - name: "Product approves impact"
+      - name: "Developer approves impact"
         status: "completed"
         timestamp: 2026-04-27T09:30:00Z
 
@@ -736,24 +765,59 @@ Commits:
 
 ---
 
-## Agent x Skill Matrix
+### Skill 9: bifrost-hr
+
+**When:** Extending capabilities, adding new skills or agents
+
+**What it contains:**
+- Gap detection criterion (new SDK, behavior class, compliance regime)
+- Bootstrap protocol (extend or fork decision tree)
+- User approval checklist (Hard Stop confirmation required)
+- Permanent skill commit workflow
+
+**Used by:** @Intake, framework builders
+
+**Example workflow:**
+```
+Gap detection: "We need a new skill for Stripe integration"
+
+Decision tree:
+1. Does an existing skill cover this? → No
+2. Can we extend an existing skill? → Not cleanly
+3. Bootstrap new skill:
+   - Create core/skills/bifrost-stripe/SKILL.md
+   - Define: payment patterns, error handling, testing rules
+   - User confirms: "This is permanent. Continue?"
+   - Commit: core/skills/bifrost-stripe/SKILL.md
+   - Update ADRs if this changes agent count or architecture
+```
+
+**Constraints (per ADR-009):**
+- Agents: Fixed at 7 (adding one requires new ADR superseding ADR-006)
+- Skills: Grow on demand via `bifrost-hr` (no constraint)
+- Mid-flight gaps: Go through trajectory abort, not `bifrost-hr`
+
+---
+
+## Agent × Skill Matrix
 
 Which skills does each agent use?
 
-| Agent | system-context | code-standards | api-integration | component-gen | code-review | qa-validator | graphify-ref | state-mgmt |
-|-------|---|---|---|---|---|---|---|---|
-| @Intake | ✓ | - | - | - | - | - | ✓ | - |
-| @Planner | ✓ | ✓ | - | - | - | - | ✓ | - |
-| @CodeGen | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | - |
-| @QA | ✓ | ✓ | ✓ | - | - | ✓ | ✓ | - |
-| @Conductor | ✓ | - | - | - | - | - | - | ✓ |
-| @Monitor | ✓ | ✓ | - | - | - | - | - | ✓ |
-| @Reviewer | ✓ | ✓ | ✓ | ✓ | - | - | ✓ | ✓ |
+| Agent | system-context | code-standards | api-integration | component-gen | code-review | qa-validator | graphify-ref | state-mgmt | bifrost-hr |
+|-------|---|---|---|---|---|---|---|---|---|
+| @Intake | ✓ | - | - | - | - | - | ✓ | - | ✓ |
+| @Planner | ✓ | ✓ | - | - | - | - | ✓ | - | - |
+| @CodeGen | ✓ | ✓ | ✓ | ✓ | ✓ | - | ✓ | - | - |
+| @QA | ✓ | ✓ | ✓ | - | - | ✓ | ✓ | - | - |
+| @Conductor | ✓ | - | - | - | - | - | - | ✓ | - |
+| @Monitor | ✓ | ✓ | - | - | - | - | - | ✓ | - |
+| @Reviewer | ✓ | ✓ | ✓ | ✓ | - | - | ✓ | ✓ | - |
 
 ---
 
 ## See Also
 
-- [01-ARCHITECTURE.md](01-ARCHITECTURE.md) — How agents work together
-- [02-INITIALIZATION.md](02-INITIALIZATION.md) — How agents get hydrated
-- **[Technical Roadmap & Visual Architecture.md](../Technical%20Roadmap%20%26%20Visual%20Architecture.md)** — Original source (agent matrix, skill mapping)
+- [architecture.md](architecture.md) — How agents work together
+- [initialization.md](initialization.md) — How agents get hydrated
+- [decisions/ADR-006-feature-lifecycle.md](decisions/ADR-006-feature-lifecycle.md) — 7 agents, 9 skills, artifact set
+- [decisions/ADR-009-bifrost-hr.md](decisions/ADR-009-bifrost-hr.md) — Skill extension via bifrost-hr

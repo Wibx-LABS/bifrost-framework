@@ -13,7 +13,7 @@ This document consolidates the system design from multiple sources into a single
 ## The System at a Glance
 
 ```
-PRODUCT TEAM                    BIFROST FRAMEWORK                  KNOWLEDGE
+DEVELOPER TEAM                 BIFROST FRAMEWORK                  KNOWLEDGE
     │                           (Monorepo)                         LAYER
     │                               │                              │
     ├─ Claude Code         ┌────────┴────────┐            ┌────────────────┐
@@ -54,7 +54,7 @@ Each agent is a markdown template with a specific job. Hydrated per-project with
 
 | Agent | Input | Job | Output | When |
 |-------|-------|-----|--------|------|
-| **@Intake** | PATIENT.md + Architecture Graph | Understand scope + impact | IMPACT.md | Feature kickoff |
+| **@Intake** | PATIENT.md + TRAJECTORY.md + Architecture Graph | Understand scope + impact | IMPACT.md | Feature kickoff |
 | **@Planner** | IMPACT.md + Architecture Graph | Break into concrete tasks | PLAN.md (5-10 tasks) | After scope approval |
 | **@CodeGen** | PLAN.md + All Skills | Write code following rules | Source code + CODE_REVIEW.md | Execution phase |
 | **@QA** | Source code + QA Skill | Test & find issues | QA_REPORT.md + Pass/Fail gate | After code generated |
@@ -64,7 +64,7 @@ Each agent is a markdown template with a specific job. Hydrated per-project with
 
 ---
 
-## The 8 Skills (Protocols)
+## The 9 Skills (Protocols)
 
 Each skill is a repeatable protocol file. Always loaded into Claude Code + Antigravity. Answers: "What rules do I follow?"
 
@@ -78,18 +78,19 @@ Each skill is a repeatable protocol file. Always loaded into Claude Code + Antig
 | **bifrost-qa-validator** | @QA runs tests | What to test, how to structure tests | @QA, CI/CD |
 | **bifrost-graphify-ref** | Need architectural knowledge | How to query the architecture graph | @CodeGen, @Intake |
 | **bifrost-state-management** | Updating STATE.md | Format, what to track, timestamps | @Conductor |
+| **bifrost-hr** | Extending capabilities | Gap detection, skill bootstrap protocol | @Intake, framework builders |
 
 ---
 
 ## The Workflow: Feature from Scope to Merge
 
 ```
-PRODUCT WRITES SCOPE
+PRODUCT WRITES SCOPE (PATIENT.md)
   │
-  └─ Edit: .bifrost/PATIENT.md (feature requirements)
+  └─ DEV RUNS: bifrost init --patient ./PATIENT.md (Headless Ingestion)
   
 COMMAND: /bifrost:start (@Intake)
-  ├─ Reads: PATIENT.md
+  ├─ Reads: PATIENT.md + TRAJECTORY.md
   ├─ Queries: Architecture graph (what APIs/components exist?)
   ├─ Produces: IMPACT.md (scope impact analysis)
   └─ Gate: Product approval required before proceeding
@@ -97,7 +98,7 @@ COMMAND: /bifrost:start (@Intake)
 PRODUCT REVIEWS IMPACT.MD
 
 COMMAND: /bifrost:plan (@Planner)
-  ├─ Reads: PATIENT.md + IMPACT.md
+  ├─ Reads: PATIENT.md + IMPACT.md + TRAJECTORY.md
   ├─ References: Architecture graph (which functions/endpoints to call?)
   ├─ Breaks into: 5-10 concrete tasks
   ├─ Produces: PLAN.md
@@ -107,7 +108,7 @@ PRODUCT REVIEWS PLAN.MD
 
 COMMAND: /bifrost:build (@CodeGen)
   ├─ Loads: All skill files
-  ├─ Reads: PLAN.md
+  ├─ Reads: PLAN.md + TRAJECTORY.md
   ├─ Generates: Source code (following every rule in skills)
   ├─ Self-reviews: Against CODE_REVIEW.md checklist
   ├─ Produces: CODE_REVIEW.md (did we follow standards?)
@@ -162,9 +163,7 @@ FEATURE COMPLETE ✓
 
 ## Per-Feature Artifacts (.bifrost/)
 
-Everything related to one feature lives in `.bifrost/` directory:
-
-**Note:** the artifact set was refined by `instructions/decisions/ADR-010-artifact-set.md`. `HEALTH.md` was deprecated (acceptance criteria live in TRAJECTORY §3 per `instructions/decisions/ADR-008-trajectory-context-protocol.md`). `AUTONOMY.md` was folded into STATE.md frontmatter as the `autonomy:` field. The canonical 10-artifact set:
+Everything related to one feature lives in `.bifrost/` directory. The canonical 10-artifact set per ADR-010:
 
 ```
 .bifrost/
@@ -194,6 +193,8 @@ Everything related to one feature lives in `.bifrost/` directory:
 │   └── [all others]
 └── PROJECT_CONTEXT.md          # Per-project system prompt
 ```
+
+**Note:** Per ADR-010, HEALTH.md is deprecated (acceptance criteria live in TRAJECTORY §3) and AUTONOMY.md is folded into STATE.md frontmatter as the `autonomy:` field.
 
 ---
 
@@ -281,7 +282,7 @@ How much can agents decide independently?
 | **Phase-Gated** | Each phase requires approval | Complex features |
 | **Full** | Agents decide and proceed autonomously | Trusted agents + well-defined scope |
 
-Set in `.bifrost/STATE.md` frontmatter as the `autonomy:` field (per `instructions/decisions/ADR-010-artifact-set.md`).
+Set in `.bifrost/STATE.md` frontmatter as the `autonomy:` field (per ADR-010).
 
 ---
 
@@ -310,13 +311,14 @@ On failure: PR gets comment with specific issues. No merge until fixed.
 5. **Gates are approval points** — Products decides when to proceed
 6. **All code is pre-validated** — Security, standards, testing done before Backend sees it
 7. **Handoff is documentation** — HANDOFF.md tells Backend everything
+8. **TRAJECTORY is invariant** — Locked at launch; tracks design decisions and amendments
 
 ---
 
 ## See Also
 
-- [02-INITIALIZATION.md](02-INITIALIZATION.md) — How to set up a feature project
-- [03-AGENTS-AND-SKILLS.md](03-AGENTS-AND-SKILLS.md) — Detailed specs for each agent + skill
-- [04-IMPLEMENTATION-PLAN.md](04-IMPLEMENTATION-PLAN.md) — Build phases for the framework itself
-- **[Technical Roadmap & Visual Architecture.md](../Technical%20Roadmap%20%26%20Visual%20Architecture.md)** — Original detailed source (system diagrams, agent matrix)
-- **[Framework Specification.md](../Framework%20Specification.md)** — Original detailed source (full repo structure, hydration details)
+- [initialization.md](initialization.md) — How to set up a feature project
+- [agents-and-skills.md](agents-and-skills.md) — Detailed specs for each agent + skill
+- [implementation-plan.md](implementation-plan.md) — Build phases for the framework itself
+- [decisions/ADR-008-trajectory-context-protocol.md](decisions/ADR-008-trajectory-context-protocol.md) — TRAJECTORY.md specification
+- [decisions/ADR-010-artifact-set.md](decisions/ADR-010-artifact-set.md) — 10-artifact set decision

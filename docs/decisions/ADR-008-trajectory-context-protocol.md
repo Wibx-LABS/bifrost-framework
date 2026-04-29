@@ -4,7 +4,7 @@
 
 ## The framing
 
-Every Bifrost feature is a rocket flight. *Ignition* is the user's raw idea (PATIENT.md authored by Product); *landing* is the merged PR (Backend's responsibility). The *trajectory* — everything from `/bifrost:start` to `/bifrost:deliver` — is the framework's responsibility. **Context lost during the trajectory cannot be recovered later**: a constraint forgotten at intake propagates through plan, build, QA, and review; by the time it surfaces (if it ever does), the rocket has flown off-course and remediation is rework.
+Every Bifrost feature is a rocket flight. *Ignition* is the user's raw idea (PATIENT.md authored by Developer); *landing* is the merged PR (Backend's responsibility). The *trajectory* — everything from `/bifrost:start` to `/bifrost:deliver` — is the framework's responsibility. **Context lost during the trajectory cannot be recovered later**: a constraint forgotten at intake propagates through plan, build, QA, and review; by the time it surfaces (if it ever does), the rocket has flown off-course and remediation is rework.
 
 This ADR specifies the **trajectory-context protocol** that prevents context loss across the lifecycle.
 

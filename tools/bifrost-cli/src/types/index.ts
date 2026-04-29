@@ -190,6 +190,7 @@ export interface BifrostState {
     id: string;
     feature: string;
     status: BifrostStatus;
+    autonomy: AutonomyLevel;
     created: string;
     version: string;
     timeline: TimelineEntry[];

@@ -779,6 +779,6 @@ Framework is successful when:
 
 ## See Also
 
-- [01-ARCHITECTURE.md](01-ARCHITECTURE.md) — What you're building
-- [05-SUCCESS-CRITERIA.md](05-SUCCESS-CRITERIA.md) — Metrics that matter
+- [architecture.md](architecture.md) — What you're building
+- [success-criteria-CRITERIA.md](success-criteria-CRITERIA.md) — Metrics that matter
 - **[Technical Roadmap & Visual Architecture.md](../Technical%20Roadmap%20%26%20Visual%20Architecture.md)** — Original detailed source

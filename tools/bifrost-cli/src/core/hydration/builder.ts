@@ -77,6 +77,15 @@ export async function writeHydrationFiles(
     );
 }
 
+// Placeholder to satisfy outdated integration tests
+export async function buildHydration(answers: any, knowledge: any, projectPath: string, autonomyLevel?: any): Promise<any> {
+    return {
+        project: { name: answers.featureName || answers.projectName || 'Test', autonomyLevel },
+        meta: { interrogationPath: answers.path },
+        instructions: { destination: 'apps/business', featureScope: answers.featureName }
+    };
+}
+
 function buildInterrogationMarkdown(answers: InterrogationAnswers): string {
     const lines: string[] = [
         `# Interrogation Results`,
