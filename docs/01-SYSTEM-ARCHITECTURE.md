@@ -10,6 +10,15 @@ This document consolidates the system design from multiple sources into a single
 
 ---
 
+Bifrost "hydrates" templates so that an external AI (like Claude or Gemini) can act as a specialized role (e.g., @Intake) with all the project-specific knowledge it needs. The hydration is **surgical**—it prunes massive knowledge files into high-density context chunks to minimize token wastage and context loss.
+
+### The Five Invariants (Ground Rules)
+1. **Per-Feature Lifecycle**: The unit of work is a *feature*, not a screen.
+2. **Fixed Agents (7)**: The lifecycle roles are immutable. Growth happens via **Skills**, not new agents.
+3. **Rocket Flight Protocol**: The trajectory is locked at launch. Context lost at intake is lost forever.
+4. **Knowledge Graph as Truth**: Backend dependencies are resolved via the graph, not placeholder tags.
+5. **Single-Stack Target**: v0 targets Wiboo's Angular 15 + Nx 16 monorepo exclusively.
+
 ## The System at a Glance
 
 ```
@@ -52,15 +61,15 @@ DEVELOPER TEAM                 BIFROST FRAMEWORK                  KNOWLEDGE
 
 Each agent is a markdown template with a specific job. Hydrated per-project with actual context.
 
-| Agent | Input | Job | Output | When |
-|-------|-------|-----|--------|------|
-| **@Intake** | PATIENT.md + TRAJECTORY.md + Architecture Graph | Understand scope + impact | IMPACT.md | Feature kickoff |
-| **@Planner** | IMPACT.md + Architecture Graph | Break into concrete tasks | PLAN.md (5-10 tasks) | After scope approval |
-| **@CodeGen** | PLAN.md + All Skills | Write code following rules | Source code + CODE_REVIEW.md | Execution phase |
-| **@QA** | Source code + QA Skill | Test & find issues | QA_REPORT.md + Pass/Fail gate | After code generated |
-| **@Conductor** | STATE.md + every step | Track state, decide next action | Updated STATE.md + autonomy decisions | Continuous (every step) |
-| **@Monitor** | .bifrost/ + filesystem | Detect drift from spec | VITALS.md (what changed?) | Continuous monitoring |
-| **@Reviewer** | All artifacts + source | Prepare for Backend handoff | HANDOFF.md + PR metadata | Before delivery |
+| Agent | Input | Job | Output | Efficiency Law |
+|-------|-------|-----|--------|----------------|
+| **@Intake** | PATIENT.md + TRAJECTORY.md + Architecture Graph | Understand scope + impact | IMPACT.md | Context Density < 40% |
+| **@Planner** | IMPACT.md + Architecture Graph | Break into concrete tasks | PLAN.md (5-10 tasks) | Context Density < 40% |
+| **@CodeGen** | PLAN.md + All Skills | Write code following rules | Source code + CODE_REVIEW.md | Pattern Density > 60% |
+| **@QA** | Source code + QA Skill | Test & find issues | QA_REPORT.md + Pass/Fail gate | Comprehensive Edge-Case Capture |
+| **@Conductor** | STATE.md + every step | Track state, decide next action | Updated STATE.md + autonomy decisions | Zero-Noise Status Reporting |
+| **@Monitor** | .bifrost/ + filesystem | Detect drift from spec | VITALS.md (what changed?) | Real-time Drift Detection |
+| **@Reviewer** | All artifacts + source | Prepare for Backend handoff | HANDOFF.md + PR metadata | Zero-Jargon Delivery |
 
 ---
 
@@ -82,119 +91,45 @@ Each skill is a repeatable protocol file. Always loaded into Claude Code + Antig
 
 ---
 
-## The Workflow: Feature from Scope to Merge
+### The Rocket Flight Workflow
 
-```
-PRODUCT WRITES SCOPE (PATIENT.md)
-  │
-  └─ DEV RUNS: bifrost init --patient ./PATIENT.md (Headless Ingestion)
-  
-COMMAND: /bifrost:start (@Intake)
-  ├─ Reads: PATIENT.md + TRAJECTORY.md
-  ├─ Queries: Architecture graph (what APIs/components exist?)
-  ├─ Produces: IMPACT.md (scope impact analysis)
-  └─ Gate: Product approval required before proceeding
+The feature lifecycle is modeled after a rocket flight: **Ignition** is the raw `PATIENT.md`, **Landing** is the merged PR. The **Trajectory** is the framework's responsibility.
 
-PRODUCT REVIEWS IMPACT.MD
+1. **Ignition (@Intake)**: `/bifrost:start` reads `PATIENT.md` and locks the **TRAJECTORY.md**.
+2. **Pathfinding (@Planner)**: `/bifrost:plan` breaks requirements into 5-10 concrete tasks.
+3. **Execution (@CodeGen)**: `/bifrost:build` generates source code following skill protocols.
+4. **Validation (@QA)**: `/bifrost:qa` runs tests against Trajectory §3 criteria.
+5. **Guidance (@Conductor)**: Continuous state management and autonomy enforcement in `STATE.md`.
+6. **Telemetry (@Monitor)**: Background drift detection against the locked invariants.
+7. **Landing (@Reviewer)**: `/bifrost:deliver` produces `HANDOFF.md` and opens the GitHub PR.
 
-COMMAND: /bifrost:plan (@Planner)
-  ├─ Reads: PATIENT.md + IMPACT.md + TRAJECTORY.md
-  ├─ References: Architecture graph (which functions/endpoints to call?)
-  ├─ Breaks into: 5-10 concrete tasks
-  ├─ Produces: PLAN.md
-  └─ Gate: Product approval required
-
-PRODUCT REVIEWS PLAN.MD
-
-COMMAND: /bifrost:build (@CodeGen)
-  ├─ Loads: All skill files
-  ├─ Reads: PLAN.md + TRAJECTORY.md
-  ├─ Generates: Source code (following every rule in skills)
-  ├─ Self-reviews: Against CODE_REVIEW.md checklist
-  ├─ Produces: CODE_REVIEW.md (did we follow standards?)
-  └─ Auto-runs: Tests → QA_REPORT.md
-
-@QA VALIDATES (@QA)
-  ├─ Runs: Happy path + sad path + edge cases
-  ├─ Checks: API integration vs API_CONTRACTS.md
-  ├─ Produces: QA_REPORT.md
-  ├─ If Fail: Hard stops, Product fixes
-  └─ If Pass: Continues
-
-@CONDUCTOR UPDATES STATE.MD
-  ├─ Marks: All tasks complete
-  ├─ Lists: All files changed
-  └─ Tracks: Every step taken
-
-COMMAND: /bifrost:deliver (@Conductor)
-  ├─ Produces: HANDOFF.md
-  │  ├─ What changed?
-  │  ├─ Which APIs were called? (validated against graph)
-  │  ├─ What tests were written?
-  │  └─ What edge cases?
-  └─ Creates: Pull request to Backend
-
-GIT HOOKS VALIDATE BEFORE COMMIT
-  ├─ STATE.md is valid
-  ├─ All files referenced exist
-  └─ API calls match API_CONTRACTS.md
-
-PR PUSHED TO BACKEND
-  │
-  ├─ GitHub Actions Run
-  │  ├─ bifrost-validate state
-  │  ├─ bifrost-validate api-calls
-  │  ├─ bifrost-validate code-standards
-  │  └─ bifrost-validate qa-report
-  │
-  ├─ BACKEND DEV REVIEWS
-  │  ├─ Reads: HANDOFF.md (context)
-  │  ├─ Scans: Code (should already follow standards)
-  │  ├─ Validates: API calls (checked against graph)
-  │  ├─ Reviews: Tests (should be comprehensive)
-  │  └─ If Good → Merge
-  │
-  └─ MERGE TO MAIN
-
-FEATURE COMPLETE ✓
-```
+### Autonomy Levels (Enforced by @Conductor)
+Set in `.bifrost/STATE.md` frontmatter:
+- **Task-Gated**: Approval required before each task (Default).
+- **Phase-Gated**: Approval required before each phase.
+- **Full**: Autonomous within the lifecycle (stops at Trajectory abort or QA fail).
 
 ---
 
-## Per-Feature Artifacts (.bifrost/)
+### The Canonical 10-Artifact Set (.bifrost/)
 
-Everything related to one feature lives in `.bifrost/` directory. The canonical 10-artifact set per ADR-010:
+Everything related to one feature lives in the `.bifrost/` directory.
 
-```
-.bifrost/
-├── PATIENT.md           # Feature scope (input by Product)
-├── TRAJECTORY.md        # Locked invariants (output by @Intake — per ADR-008)
-├── IMPACT.md            # Scope impact analysis (output by @Intake)
-├── PLAN.md              # Task breakdown (output by @Planner)
-├── STATE.md             # Execution state (updated by @Conductor; carries autonomy in frontmatter)
-├── CODE_REVIEW.md       # Self-review results (output by @CodeGen)
-├── QA_REPORT.md         # Test results (output by @QA)
-├── HANDOFF.md           # Backend delivery (output by @Reviewer)
-├── VITALS.md            # Drift report (output by @Monitor; only when drift detected)
-├── PROJECT_CONTEXT.md   # Per-project system prompt (created once at bifrost-init)
-├── agents/
-│   ├── Intake_HYDRATED.md          # Customized for this project
-│   ├── Planner_HYDRATED.md
-│   ├── CodeGen_HYDRATED.md
-│   ├── QA_HYDRATED.md
-│   ├── Reviewer_HYDRATED.md
-│   ├── Conductor_HYDRATED.md
-│   └── Monitor_HYDRATED.md
-├── skills/
-│   ├── bifrost-system-context/SKILL.md
-│   ├── bifrost-code-standards/SKILL.md
-│   ├── bifrost-api-integration/SKILL.md
-│   ├── bifrost-qa-validator/SKILL.md
-│   └── [all others]
-└── PROJECT_CONTEXT.md          # Per-project system prompt
-```
+| Artifact | Purpose | Author |
+| :--- | :--- | :--- |
+| **PATIENT.md** | Feature scope input | Developer |
+| **TRAJECTORY.md** | **Locked invariants** (ADR-008) | @Intake |
+| **IMPACT.md** | Scope analysis & Gap detection | @Intake |
+| **PLAN.md** | Task breakdown (Trajectory tagged) | @Planner |
+| **STATE.md** | Execution state & Economic harness | @Conductor |
+| **CODE_REVIEW.md** | Self-review report | @CodeGen |
+| **QA_REPORT.md** | Test results (Pass/Fail gate) | @QA |
+| **HANDOFF.md** | Backend delivery summary | @Reviewer |
+| **VITALS.md** | Drift report (when drift happens) | @Monitor |
+| **PROJECT_CONTEXT.md** | Per-project system prompt | `bifrost-init` |
 
-**Note:** Per ADR-010, HEALTH.md is deprecated (acceptance criteria live in TRAJECTORY §3) and AUTONOMY.md is folded into STATE.md frontmatter as the `autonomy:` field.
+> [!NOTE]
+> `HEALTH.md` is deprecated (acceptance criteria live in TRAJECTORY §3) and `AUTONOMY.md` is folded into `STATE.md` frontmatter.
 
 ---
 
@@ -203,12 +138,14 @@ Everything related to one feature lives in `.bifrost/` directory. The canonical 
 STATE.md is the **single source of truth** for feature execution state.
 
 ```markdown
-# STATE.md
+# STATE.md (Economic Harness)
 
 Feature: Add User Notifications
 Admitted: 2026-04-27 09:00 UTC
 Status: in_progress
 Autonomy: Task-Gated
+Token Budget: 500,000 (Used: 42,000)
+Session Metrics: { turns: 3, redos: 0, context_density: 34% }
 
 ## Phase 1: API Integration
 - [x] Task 1: Create notification endpoint - COMPLETED 09:15
@@ -251,6 +188,20 @@ The Architecture Graph (internal directory: `knowledge/`) provides:
 - **@Intake** queries: "What APIs exist for notifications?"
 - **@CodeGen** queries: "What pattern do we use for API calls?"
 - **@QA** validates: "Do our API calls match the graph?"
+
+### Deterministic Hydration & Normalization
+
+The hydration engine (`builder.ts`) enforces high-fidelity context injection:
+- **Sectional Extraction**: Markdown knowledge is pruned by header (e.g., only §1 and §2 are injected for @Intake).
+- **Tag Normalization**: All tags are case-insensitive and support both `kebab-case` and `snake_case`.
+- **Dual-Source Resolution**: Templates are resolved from both global artifacts and per-agent specialized sets.
+
+### Framework Benchmarking
+
+framework integrity is verified via `bifrost-benchmark.js`:
+- **Isolation Fidelity**: Ensures zero domain leakage between parallel feature lifecycles.
+- **Pattern Targeting**: Validates that agents receive the correct surgical context for their specific role.
+- **Economic Health**: Ensures session metrics and budgets are initialized and tracked accurately.
 
 ---
 
@@ -317,8 +268,8 @@ On failure: PR gets comment with specific issues. No merge until fixed.
 
 ## See Also
 
-- [initialization.md](initialization.md) — How to set up a feature project
-- [agents-and-skills.md](agents-and-skills.md) — Detailed specs for each agent + skill
-- [implementation-plan.md](implementation-plan.md) — Build phases for the framework itself
-- [decisions/ADR-008-trajectory-context-protocol.md](decisions/ADR-008-trajectory-context-protocol.md) — TRAJECTORY.md specification
-- [decisions/ADR-010-artifact-set.md](decisions/ADR-010-artifact-set.md) — 10-artifact set decision
+- [02-OPERATOR-MANUAL.md](02-OPERATOR-MANUAL.md) — How to set up a feature project
+- [03-AGENT-SPECIFICATIONS.md](03-AGENT-SPECIFICATIONS.md) — Detailed specs for each agent + skill
+- [07-TECHNICAL-ROADMAP.md](07-TECHNICAL-ROADMAP.md) — Build phases for the framework itself
+- [01-SYSTEM-ARCHITECTURE.md](01-SYSTEM-ARCHITECTURE.md) — Core Invariants & Trajectory specification
+- [01-SYSTEM-ARCHITECTURE.md](#the-five-invariants-ground-rules) — Core Invariants & Canonical Artifact Set

@@ -1,27 +1,21 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { InterrogationAnswers, ProjectPath } from '../../types';
+import { InterrogationAnswers, ProjectPath, KnowledgeBase } from '../../types';
+import { loadKnowledge } from '../knowledge/loader';
 
 export async function writeHydrationFiles(
     bifrostDir: string,
     answers: InterrogationAnswers,
     frameworkPath: string
 ): Promise<void> {
-    const agentsDir = path.join(bifrostDir, 'agents');
-    await fs.ensureDir(agentsDir);
-
-    const templatesDir = path.join(frameworkPath, 'core', 'agents', 'templates');
-    
-    if (!(await fs.pathExists(templatesDir))) {
-        // Fallback: create empty dir if it does not exist
-        await fs.ensureDir(templatesDir);
+    const configPath = path.join(frameworkPath, 'core', 'agents', 'hydration', 'injection-points.json');
+    if (!(await fs.pathExists(configPath))) {
+        throw new Error(`Critical Error: injection-points.json not found at ${configPath}`);
     }
-
-    const files = await fs.readdir(templatesDir);
-    const templateFiles = files.filter(f => f.endsWith('_Template.md'));
+    const config = await fs.readJson(configPath);
 
     const featureName = answers.path === ProjectPath.B ? answers.projectName : answers.featureName;
-    const projectVars: Record<string, string> = {
+    const projectVars: Record<string, any> = {
         'project-name': featureName,
         'feature-name': featureName,
         'feature-description': answers.featureDescription || '',
@@ -29,105 +23,167 @@ export async function writeHydrationFiles(
         'target-app': (answers as any).targetApp || '',
         'business-value': (answers as any).businessValue || '',
         'feature-owner': (answers as any).featureOwner || '',
+        'author-name': (answers as any).featureOwner || 'Bifrost Agent',
     };
 
-    for (const file of templateFiles) {
-        const templateContent = await fs.readFile(path.join(templatesDir, file), 'utf8');
-        const injectionPoints = templateContent.match(/{{[\w-]+}}/g);
-        
-        let hydratedContent = templateContent;
-        
-        if (injectionPoints) {
-            for (const point of injectionPoints) {
-                const key = point.slice(2, -2); // remove {{ }}
-                let replacement = point;
-
-                if (projectVars[key] !== undefined) {
-                    replacement = projectVars[key];
-                } else {
-                    // Map {{some-key}} to specific files
-                    // example: {{api-contracts}} -> knowledge/API_CONTRACTS.md
-                    // example: {{code-standards}} -> core/skills/bifrost-code-standards/SKILL.md
-                    const knowledgeFile = path.join(frameworkPath, 'knowledge', `${key.toUpperCase().replace(/-/g, '_')}.md`);
-                    const skillFile = path.join(frameworkPath, 'core', 'skills', `bifrost-${key}`, 'SKILL.md');
-                    
-                    if (await fs.pathExists(knowledgeFile)) {
-                        replacement = await fs.readFile(knowledgeFile, 'utf8');
-                    } else if (await fs.pathExists(skillFile)) {
-                        replacement = await fs.readFile(skillFile, 'utf8');
-                    } else {
-                        // Fallback if not found
-                        replacement = `<!-- Missing knowledge or var for ${key} -->`;
-                    }
-                }
-                
-                hydratedContent = hydratedContent.replace(new RegExp(point, 'g'), replacement);
-            }
-        }
-        
-        const hydratedFileName = file.replace('_Template.md', '_HYDRATED.md');
-        await fs.writeFile(path.join(agentsDir, hydratedFileName), hydratedContent, 'utf8');
+    let kb: KnowledgeBase | undefined;
+    try {
+        kb = await loadKnowledge(path.join(frameworkPath, 'knowledge'));
+    } catch (e) {
+        console.warn('[WARNING] Failed to load knowledge base.');
     }
 
-    // Write interrogation.md
-    await fs.writeFile(
-        path.join(bifrostDir, 'interrogation.md'),
-        buildInterrogationMarkdown(answers),
-        'utf8'
+    // 1. Hydrate Artifacts (core/templates)
+    await hydrateSet(
+        path.join(frameworkPath, 'core', 'templates'),
+        bifrostDir,
+        config._artifact_templates,
+        projectVars,
+        kb,
+        frameworkPath,
+        false
     );
+
+    // 2. Hydrate Agents (core/agents/templates)
+    const agentsDir = path.join(bifrostDir, 'agents');
+    await fs.ensureDir(agentsDir);
+    await hydrateSet(
+        path.join(frameworkPath, 'core', 'agents', 'templates'),
+        agentsDir,
+        config._agent_templates,
+        projectVars,
+        kb,
+        frameworkPath,
+        true
+    );
+
+    await fs.writeFile(path.join(bifrostDir, 'interrogation.md'), buildInterrogationMarkdown(answers), 'utf8');
 }
 
-// Placeholder to satisfy outdated integration tests
-export async function buildHydration(answers: any, knowledge: any, projectPath: string, autonomyLevel?: any): Promise<any> {
-    return {
-        project: { name: answers.featureName || answers.projectName || 'Test', autonomyLevel },
-        meta: { interrogationPath: answers.path },
-        instructions: { destination: 'apps/business', featureScope: answers.featureName }
-    };
+async function hydrateSet(
+    sourceDir: string,
+    destDir: string,
+    mapping: any,
+    projectVars: Record<string, any>,
+    kb: KnowledgeBase | undefined,
+    frameworkPath: string,
+    renameToHydrated: boolean
+) {
+    for (const [templateName, points] of Object.entries(mapping)) {
+        const sourcePath = path.join(sourceDir, templateName);
+        if (!(await fs.pathExists(sourcePath))) continue;
+
+        let content = await fs.readFile(sourcePath, 'utf8');
+        const tags = content.match(/{{[\w-]+}}/g) || [];
+
+        // Pre-resolve all unique tags to prevent redundant processing
+        const uniqueTags = Array.from(new Set(tags));
+        for (const tag of uniqueTags) {
+            const key = tag.slice(2, -2).toLowerCase().replace(/_/g, '-');
+            const pointKey = Object.keys(points as object).find(k => k.toLowerCase().replace(/_/g, '-') === key);
+            const pointConfig = pointKey ? (points as any)[pointKey] : null;
+            
+            let replacement = tag;
+            if (pointConfig) {
+                replacement = await resolveInjection(pointConfig, projectVars, kb, frameworkPath, key);
+            } else if (projectVars[key]) {
+                replacement = projectVars[key];
+            }
+
+            content = content.split(tag).join(replacement);
+        }
+
+        const destFileName = renameToHydrated ? templateName.replace('_Template.md', '_HYDRATED.md') : templateName;
+        await fs.writeFile(path.join(destDir, destFileName), content, 'utf8');
+    }
+}
+
+async function resolveInjection(
+    config: any,
+    projectVars: Record<string, any>,
+    kb: KnowledgeBase | undefined,
+    frameworkPath: string,
+    key: string
+): Promise<string> {
+    switch (config.source) {
+        case 'interview':
+            const interviewKey = config.key.toLowerCase().replace(/_/g, '-');
+            return String(projectVars[interviewKey] || `<!-- Missing interview key: ${config.key} -->`);
+        case 'computed':
+            if (config.value === 'iso-date') return new Date().toISOString().split('T')[0];
+            if (config.value === 'iso-timestamp') return new Date().toISOString();
+            if (config.value === 'framework-version') return '1.0.0-os';
+            if (config.value === 'constant:pending') return 'pending';
+            if (config.value.startsWith('constant:')) return config.value.replace('constant:', '');
+            if (config.value === 'uuid') return Math.random().toString(36).substring(2, 15);
+            if (config.value === 'kebab-case-of-project-name') {
+                return String(projectVars['project-name'] || 'unknown').toLowerCase().replace(/\s+/g, '-');
+            }
+            return `<!-- Unknown computed value: ${config.value} -->`;
+        case 'agent_fill':
+            return `{{${key}}}`;
+        case 'knowledge':
+            if (key === 'api-contracts' && kb) {
+                const targetApp = projectVars['target-app'];
+                const filtered = targetApp ? kb.findApiByDomain(targetApp) : kb.apis;
+                return filtered.length > 0 ? filtered.map(api => api.rawContent).join('\n\n---\n\n') : `<!-- No APIs found for ${targetApp} -->`;
+            }
+            if (key === 'component-library' && kb) {
+                const targetApp = projectVars['target-app'];
+                const filtered = kb.components.filter(c => 
+                    c.category.toLowerCase().includes('general') || 
+                    c.category.toLowerCase().includes('common') ||
+                    (targetApp && c.rawContent.toLowerCase().includes(targetApp.toLowerCase()))
+                );
+                return filtered.map(c => c.rawContent).join('\n\n---\n\n');
+            }
+
+            const filePath = path.join(frameworkPath, 'knowledge', config.file);
+            if (!(await fs.pathExists(filePath))) return `<!-- Knowledge file missing: ${config.file} -->`;
+            let fileContent = await fs.readFile(filePath, 'utf8');
+            if (config.sections || config.section) {
+                return extractMarkdownSections(fileContent, config.sections || [config.section]);
+            }
+            return fileContent;
+        default:
+            return `<!-- Unknown source: ${config.source} -->`;
+    }
+}
+
+function extractMarkdownSections(content: string, sections: string[]): string {
+    const lines = content.split('\n');
+    const result: string[] = [];
+    let capturing = false;
+
+    for (const line of lines) {
+        if (line.startsWith('## ')) {
+            const header = line.replace('## ', '').trim();
+            const shouldStart = sections.some(s => {
+                const cleanS = s.toString().toLowerCase();
+                const cleanH = header.toLowerCase();
+                return cleanH.startsWith(cleanS + '.') || cleanH === cleanS || cleanH.startsWith(cleanS + ' ');
+            });
+
+            if (shouldStart) {
+                capturing = true;
+                result.push(line);
+            } else {
+                capturing = false;
+            }
+            continue;
+        }
+        
+        if (capturing) {
+            result.push(line);
+        }
+    }
+    return result.length > 0 ? result.join('\n').trim() : `<!-- No matching sections found for: ${sections.join(', ')} -->`;
 }
 
 function buildInterrogationMarkdown(answers: InterrogationAnswers): string {
-    const lines: string[] = [
-        `# Interrogation Results`,
-        ``,
-        `**Date:** ${new Date().toISOString()}`,
-        `**Path:** ${answers.path}`,
-        ``,
-        `## Answers`,
-        ``,
-    ];
-
+    const lines: string[] = [`# Interrogation Results`, ``, `**Date:** ${new Date().toISOString()}`, `**Path:** ${answers.path}`, ``];
     if (answers.path === ProjectPath.A) {
-        lines.push(`- **Feature Name:** ${answers.featureName}`);
-        lines.push(`- **Description:** ${answers.featureDescription}`);
-        lines.push(`- **Business Value:** ${answers.businessValue}`);
-        lines.push(`- **Owner:** ${answers.featureOwner}`);
-        if (answers.constraints) {
-            lines.push(`- **Constraints:** ${answers.constraints}`);
-        }
-        lines.push(`- **Target App:** ${answers.targetApp}`);
-        lines.push(`- **Scope:** ${answers.featureScope}`);
-        if (answers.targetSection) {
-            lines.push(`- **Section:** ${answers.targetSection}`);
-        }
-        lines.push(`- **Needs State/API:** ${answers.needsApi ? 'Yes' : 'No'}`);
-        lines.push(`- **Timeline:** ${answers.timeline}`);
-    } else if (answers.path === ProjectPath.B) {
-        lines.push(`- **Project Name:** ${answers.projectName}`);
-        lines.push(`- **Feature:** ${answers.featureName}`);
-        lines.push(`- **Description:** ${answers.featureDescription}`);
-        lines.push(`- **User Actions:**`);
-        answers.userActions.forEach((a, i) => lines.push(`  ${i + 1}. ${a}`));
-        if (answers.externalServices.length > 0) {
-            lines.push(`- **External Services:** ${answers.externalServices.join(', ')}`);
-        }
-        lines.push(`- **Timeline:** ${answers.timeline}`);
-    } else {
-        const c = answers as { buildingWhat?: string; featureName: string; featureDescription: string; timeline: string };
-        lines.push(`- **What:** ${c.buildingWhat ?? c.featureName}`);
-        lines.push(`- **Description:** ${c.featureDescription}`);
-        lines.push(`- **Timeline:** ${c.timeline}`);
+        lines.push(`- **Feature Name:** ${answers.featureName}`, `- **Description:** ${answers.featureDescription}`, `- **Target App:** ${answers.targetApp}`, `- **Scope:** ${answers.featureScope}`, `- **Timeline:** ${answers.timeline}`);
     }
-
     return lines.join('\n');
 }

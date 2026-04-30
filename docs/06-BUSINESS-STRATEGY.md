@@ -55,20 +55,20 @@ Feature shipped
 
 ## What Bifrost Solves
 
-### After Bifrost (Developer-First)
+### After Bifrost (Agent-Assisted)
 
 ```
 Product (PATIENT.md)
     ↓
 Developer (bifrost init --patient)
     ↓
-@Intake agent (Impact Analysis)
+@Intake template (Instructions for AI)
     ↓
-@Planner agent (Task Breakdown)
+@Planner template (Instructions for AI)
     ↓
-@CodeGen agent (Automated Coding)
+@CodeGen template (Instructions for AI)
     ↓
-@QA agent (Automated Validation)
+@QA template (Instructions for AI)
     ↓
 Developer (Final Review + PR)
     ↓
@@ -77,9 +77,9 @@ Feature shipped
 
 **New workflow:**
 - **Zero-Friction Setup**: Developers ingest Product specs instantly via Headless Mode.
-- **AI-Augmented Impact**: @Intake identifies architectural collision points before a single line is written.
-- **Pre-PR Validation**: Automated @QA loops ensure the code meets standards *before* human review.
-- **Token Efficiency**: Graph-first queries lower the cost of large-scale repo analysis.
+- **Agent-Assisted Impact**: Bifrost provides the @Intake context so an external AI can identify architectural collision points before a single line is written.
+- **Pre-PR Validation**: Bifrost provides @QA protocols that allow an external AI to ensure the code meets standards *before* human review.
+- **Token Efficiency**: Graph-first queries lower the cost of large-scale repo analysis for the AI.
 
 ### New Metrics (Target)
 
@@ -312,7 +312,7 @@ NOT a 2-week prototype. Before scaling to all Product staff, validate:
 
 ### For CTO
 
-> Bifrost is a productivity multiplier for our Senior Developers. By automating the boilerplate, setup, and first-pass QA, we allow our core team to focus on complex architecture and business logic. It's about increasing **Developer Velocity** by 3-4x while lowering operational costs (tokens) via graph-first reasoning.
+> Bifrost is a productivity multiplier for our Senior Developers. By providing the infrastructure, skills, and context for AI agents, we allow our core team to focus on complex architecture and business logic. It's about increasing **Developer Velocity** by 3-4x while lowering operational costs (tokens) via graph-first reasoning.
 
 ### For Senior Developers
 

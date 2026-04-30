@@ -6,13 +6,20 @@ topic: bifrost/agents-skills
 
 # BIFROST Agents & Skills Reference
 
-Complete specification of all 7 agents and all 9 skills. This is the **single source of truth** for what each does. **Source materials:** Technical Roadmap & Visual Architecture, Framework Specification, ADR-006, ADR-009.
+Complete specification of all 7 agents and all 9 skills. This is the **single source of truth** for what each does. **Source materials:** Technical Roadmap & Visual Architecture, Framework Specification, Core Invariants.
 
 ---
 
-## THE 7 AGENTS (Named Roles)
+Each agent is a **markdown template file** that provides instructions and context for an external AI assistant (like Claude Code). Bifrost does not run these agents internally via AI; instead, it prepares the templates so that the AI can act as the specified role. Agents are "hydrated" per-project with context-specific values before being used by the AI.
 
-Each agent is a markdown template file that executes a specific job in the workflow. Agents are hydrated per-project with context-specific values.
+### Core Agent Protocols
+1. **Fixed Roster**: Agents are fixed at 7 lifecycle roles. Adding a new agent requires a formal architectural override.
+2. **Mandatory Trajectory Read**: Every agent's first action is to read `.bifrost/TRAJECTORY.md`.
+3. **Artifact Acknowledgement**: Every artifact produced must contain a `## Trajectory acknowledged` section.
+4. **Trajectory Abort**: If a locked invariant is violated or a gap is found mid-flight, the agent must **Hard Stop**.
+
+> [!IMPORTANT]
+> **The "Thin Agent" Law**: All hydrated agents must maintain a **Context Density < 40%**. Excessive context (instruction sets > 20k tokens) is a failure of Context Engineering. Bifrost uses **Surgical Hydration** to ensure agents receive only the high-density sections of knowledge relevant to their phase.
 
 ---
 
@@ -58,6 +65,11 @@ TRAJECTORY.md contains:
 ✓ Architectural decisions (patterns chosen, why)
 ✓ External context (APIs, dependencies, gotchas)
 ✓ Amendments log (append-only record of changes)
+
+Efficiency Metrics:
+✓ Context Density < 40% (Verified)
+✓ Redos: 0 (Deterministic intake)
+✓ Token usage within phase budget
 ```
 
 ---
@@ -170,11 +182,12 @@ CODE_REVIEW.md contains:
 ✓ TypeScript strict mode passes
 
 Test Results:
-✓ 24 unit tests passing
-✓ 0 failing
-✓ Happy path covered
-✓ Sad path covered
-✓ Edge cases covered
+✓ unit tests passing (Happy path, Sad path, Edge cases)
+
+Efficiency Metrics:
+✓ Context Density < 45% (High density implementation)
+✓ Pattern Targeting: 100% (No generic inventions)
+✓ Redos < 2 per complex task
 ```
 
 ---
@@ -765,37 +778,20 @@ Commits:
 
 ---
 
-### Skill 9: bifrost-hr
+### Skill 9: bifrost-hr (Gap Detection & Growth)
 
-**When:** Extending capabilities, adding new skills or agents
+**When:** During `@Intake` (/bifrost:start) when a domain gap is detected.
 
 **What it contains:**
-- Gap detection criterion (new SDK, behavior class, compliance regime)
-- Bootstrap protocol (extend or fork decision tree)
-- User approval checklist (Hard Stop confirmation required)
-- Permanent skill commit workflow
+- **Gap Detection Criterion**: Triggers when `PATIENT.md` surfaces patterns/libraries not covered by existing skills.
+- **Bootstrap Protocol**: "Extend or Fork" decision logic for new skills.
+- **User Approval Checklist**: Roster changes require a **Hard Stop** and explicit human authorization.
 
-**Used by:** @Intake, framework builders
+**Used by:** `@Intake` only.
 
-**Example workflow:**
-```
-Gap detection: "We need a new skill for Stripe integration"
-
-Decision tree:
-1. Does an existing skill cover this? → No
-2. Can we extend an existing skill? → Not cleanly
-3. Bootstrap new skill:
-   - Create core/skills/bifrost-stripe/SKILL.md
-   - Define: payment patterns, error handling, testing rules
-   - User confirms: "This is permanent. Continue?"
-   - Commit: core/skills/bifrost-stripe/SKILL.md
-   - Update ADRs if this changes agent count or architecture
-```
-
-**Constraints (per ADR-009):**
-- Agents: Fixed at 7 (adding one requires new ADR superseding ADR-006)
-- Skills: Grow on demand via `bifrost-hr` (no constraint)
-- Mid-flight gaps: Go through trajectory abort, not `bifrost-hr`
+**Efficiency Law**: 
+- Mid-flight gaps (discovered by `@CodeGen` or `@QA`) trigger a **Trajectory Abort**, not `bifrost-hr`.
+- New skills are permanently committed to `core/skills/` to prevent redundant bootstrapping.
 
 ---
 
@@ -817,7 +813,6 @@ Which skills does each agent use?
 
 ## See Also
 
-- [architecture.md](architecture.md) — How agents work together
-- [initialization.md](initialization.md) — How agents get hydrated
-- [decisions/ADR-006-feature-lifecycle.md](decisions/ADR-006-feature-lifecycle.md) — 7 agents, 9 skills, artifact set
-- [decisions/ADR-009-bifrost-hr.md](decisions/ADR-009-bifrost-hr.md) — Skill extension via bifrost-hr
+- [01-SYSTEM-ARCHITECTURE.md](01-SYSTEM-ARCHITECTURE.md) — How agents work together
+- [02-OPERATOR-MANUAL.md](02-OPERATOR-MANUAL.md) — How agents get hydrated
+- [01-SYSTEM-ARCHITECTURE.md](#the-five-invariants-ground-rules) — Invariants & Artifact Set

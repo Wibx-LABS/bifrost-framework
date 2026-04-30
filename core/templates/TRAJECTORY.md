@@ -1,8 +1,7 @@
 <!--
 TRAJECTORY.md — locked-at-launch invariant store for one feature.
 
-Bound by ADR-008 (Trajectory-context protocol). See:
-  instructions/decisions/ADR-008-trajectory-context-protocol.md
+Bound by the **Rocket Flight Protocol** documented in `docs/architecture.md`.
 
 CRITICAL RULES:
   1. Sections 1–5 are LOCKED ON WRITE. Once @Intake finalizes /bifrost:start,

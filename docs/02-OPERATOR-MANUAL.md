@@ -321,7 +321,7 @@ See docs/QUICKSTART.md for full workflow.
 │                                                     │
 │  Mapping to apps/business...          [ DONE ]      │
 │  Injecting NgRx patterns...           [ DONE ]      │
-│  Training AI (Claude/Antigravity)...  [ DONE ]      │
+│  Context injection (Claude/Antigravity)... [ DONE ]      │
 │  Installing Git Hooks...              [ DONE ]      │
 │                                                     │
 │  Progress: [████████████████████████████████] 100%  │
@@ -423,12 +423,12 @@ Known gotchas:
 6. **Approve and proceed**  
    When you're ready, run `/bifrost:plan`
 
-See [architecture.md](architecture.md) for the full workflow after initialization.
+See [01-SYSTEM-ARCHITECTURE.md](01-SYSTEM-ARCHITECTURE.md) for the full workflow after initialization.
 
 ---
 
 ## See Also
 
-- [architecture.md](architecture.md) — Workflow after init is complete
-- [agents-and-skills.md](agents-and-skills.md) — Details on what each agent/skill does
-- [decisions/ADR-008-trajectory-context-protocol.md](decisions/ADR-008-trajectory-context-protocol.md) — TRAJECTORY.md specification
+- [01-SYSTEM-ARCHITECTURE.md](01-SYSTEM-ARCHITECTURE.md) — Workflow after init is complete
+- [03-AGENT-SPECIFICATIONS.md](03-AGENT-SPECIFICATIONS.md) — Details on what each agent/skill does
+- [01-SYSTEM-ARCHITECTURE.md](01-SYSTEM-ARCHITECTURE.md) — Core Invariants & Trajectory specification

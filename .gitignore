@@ -10,6 +10,7 @@ build/
 *.tsbuildinfo
 
 # Testing
+scratch/
 coverage/
 .nyc_output/
 *.lcov

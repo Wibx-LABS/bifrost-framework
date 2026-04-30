@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 import { loadConfig, getBifrostDir, getStatePath } from '../config';
 import { readState } from '../core/state/manager';
-import { blank, header, info, renderStatus } from '../ui';
+import { blank, header, info, renderStatus, microLoader } from '../ui';
 
 export default class Status extends Command {
     static description = 'Show the current Bifrost workflow status';
@@ -34,6 +34,8 @@ export default class Status extends Command {
         if (!(await fs.pathExists(statePath))) {
             this.error('Nenhum .bifrost/ encontrado. Execute `bifrost init` para inicializar o projeto.');
         }
+
+        await microLoader('Syncing state graph...');
 
         let state;
         try {

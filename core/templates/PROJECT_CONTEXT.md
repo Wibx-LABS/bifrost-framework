@@ -4,9 +4,7 @@ PROJECT_CONTEXT.md — per-project system prompt. Written ONCE at bifrost-init.
 Bound by:
   - bifrost-system-context (file layout — every agent reads this on wake)
   - instructions/02-INITIALIZATION.md (created by bifrost-init)
-  - ADR-005 (single-stack v0 — Wiboo Angular monorepo)
-  - ADR-007 (Wiboo as v0 target)
-  - ADR-010 (canonical 10-artifact set)
+  - **Core Invariants** (Lifecycle, Stack Lock, Artifact Set) in `docs/architecture.md`.
 
 DISTINCT FROM TRAJECTORY.md
   TRAJECTORY is per-feature locked invariants. PROJECT_CONTEXT is per-PROJECT
@@ -58,7 +56,7 @@ When you write code here, you are writing inside ONE of those apps or libs. The 
 
 ---
 
-## Stack lock (per ADR-007 / knowledge/TECH_STACK.md)
+## Stack lock (per `docs/architecture.md` / `knowledge/TECH_STACK.md`)
 
 These versions are **locked** for v0. Bumping any of them requires an ADR.
 
@@ -153,7 +151,7 @@ From `knowledge/TECH_STACK.md` Performance Targets:
 - Bundle size: < 500 KB gzipped per app
 - Lighthouse: > 90 (a11y, best practices)
 
-From `instructions/decisions/ADR-007-wiboo-monorepo.md` operational acceptance:
+From `docs/architecture.md` (Operational Acceptance Criteria):
 
 - Pilot feature start → deliver: < 4 hours
 - Backend dev review changes: < 10% of generated code

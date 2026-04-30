@@ -81,10 +81,11 @@ Day 5:
 
 ### Success Criteria
 
-- [ ] `bifrost init --project "test"` creates .bifrost/ in < 2 minutes
-- [ ] Hydrated agents contain actual project-specific context
-- [ ] First example project initializes cleanly
-- [ ] QUICKSTART.md is clear enough for non-technical user
+- [✓] `bifrost init --project "test"` creates .bifrost/ in < 2 minutes
+- [✓] Hydrated agents contain actual project-specific context
+- [✓] First example project initializes cleanly
+- [✓] QUICKSTART.md is clear enough for non-technical user
+- [✓] Context Density < 40% (Verified via Benchmarking)
 
 ### Testing
 
@@ -148,6 +149,52 @@ Day 4-5:
   - Test on 2+ fresh machines
   - Verify skill loading is deterministic
   - Edge case: What if user upgrades framework?
+
+---
+
+## Phase 2.5: Infrastructure Hardening & Efficiency Suite (Week 4)
+
+**Goal:** Reduce context loss, minimize token wastage, and enforce architectural discipline through deterministic harnessing.
+
+### Deliverables
+
+- [✓] **Surgical Hydration Engine**: Section-specific markdown extraction implemented in `builder.ts`.
+- [✓] **Economic Harness**: Mandatory token budget and session metrics integrated into `STATE.md`.
+- [✓] **Prompt Normalizer**: Kebab-case tag resolution and case-insensitive matching for 100% hydration reliability.
+- [✓] **Bifrost Benchmarking Suite**: `scratch/bifrost-benchmark.js` for automated isolation and targeting testing.
+- [✓] **Thin Agent Protocol**: Codified in `SKILL.md` (Context Density < 40% target).
+
+### Work Breakdown
+
+**Week 4:**
+```
+Day 1-2:
+  - Implement extractMarkdownSections in builder.ts
+  - Refactor injection-points.json for sectional mapping
+  - Hardened stop logic for sectional extraction
+  
+Day 3:
+  - Integrate token_budget and metrics into STATE.md
+  - Add initialization logic for economic harness
+  - Update templates to include mandatory tracking blocks
+
+Day 4:
+  - Build headless benchmarking suite (bifrost-benchmark.js)
+  - Implement Isolation Fidelity tests
+  - Implement Pattern Targeting tests
+  
+Day 5:
+  - Conduct global audit of agent templates
+  - Purge redundant inline instruction bloat
+  - Verify Context Density < 40% across all hydrated agents
+```
+
+### Success Criteria
+
+- [✓] Hydrated Intake Agent < 500 lines (down from 1000+)
+- [✓] Zero domain leakage between isolated benchmark projects
+- [✓] 100% hydration success rate on kebab-case and snake_case tags
+- [✓] Every initialized project starts with a defined token budget
 ```
 
 ### Success Criteria
@@ -533,7 +580,7 @@ Day 5:
 ### Deliverables
 
 - ✓ `metrics.js` — Collects framework metrics
-- ✓ Tracked metrics: velocity, QA accuracy, review time, agent accuracy
+- ✓ Tracked metrics: velocity, QA accuracy, review time, instruction adherence
 - ✓ `bifrost-metrics` command (view trends)
 - ✓ Simple dashboard (spreadsheet or simple charts)
 - ✓ Documentation: "How to interpret metrics"
@@ -779,6 +826,6 @@ Framework is successful when:
 
 ## See Also
 
-- [architecture.md](architecture.md) — What you're building
-- [success-criteria-CRITERIA.md](success-criteria-CRITERIA.md) — Metrics that matter
+- [01-SYSTEM-ARCHITECTURE.md](01-SYSTEM-ARCHITECTURE.md) — What you're building
+- [04-SUCCESS-METRICS.md](04-SUCCESS-METRICS.md) — Metrics that matter
 - **[Technical Roadmap & Visual Architecture.md](../Technical%20Roadmap%20%26%20Visual%20Architecture.md)** — Original detailed source

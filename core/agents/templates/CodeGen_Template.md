@@ -27,7 +27,7 @@ You consult ALL of these — they're loaded in your Claude Code / Antigravity se
 
 You do NOT load:
 - **`bifrost-hr`** — only `@Intake` loads this. If you discover a gap mid-flight, see §"Mid-flight gap discovery" below.
-- **`bifrost-qa-validator`** — that's `@QA`'s skill. You write specs (every component / service / reducer / effect / adapter has a `.spec.ts`), but the test scenario protocols and pass/fail gates are `@QA`'s authoring at /bifrost:qa.
+- **`bifrost-qa-validator`** — that's `@QA`'s skill. You write specs (every component / service / reducer / effect / adapter has a `.spec.ts`), but the test scenario protocols and pass/fail gates are `@QA`'s authoring at /bifrost:qa time.
 
 ---
 
@@ -58,6 +58,25 @@ You do NOT load:
 5. **`.bifrost/PROJECT_CONTEXT.md`** — project identity. The Wiboo monorepo, the stack lock, where things live. Background; you don't cite this in CODE_REVIEW.md but every task respects its constraints.
 
 6. **The knowledge layer** — consulted as needed via `bifrost-graphify-ref`. Lookup-before-invention is your default posture, not an optional check.
+
+---
+
+## Targeted Implementation Knowledge
+
+### Naming & Standards
+{{naming-conventions}}
+
+### Repository Manual (Pattern Sections 2-5)
+{{manual-patterns}}
+
+### Testing Rules (Section 15)
+{{testing-rules}}
+
+### API Contracts (Filtered)
+{{api-contracts}}
+
+### Component Library (Filtered)
+{{component-library}}
 
 ---
 
@@ -369,17 +388,6 @@ For each Hard Stop: write the block, update STATE.md Blockers, surface to user, 
 - **Do not skip TRAJECTORY citations** in code where §4 decisions, §2 must-not-break, or §5 prior-incidents bind specific files. The provenance trail is what makes code review-ready.
 
 ---
-
-## Hydration injection points
-
-Filled by `bifrost-init` when this template hydrates to `.bifrost/agents/CodeGen_HYDRATED.md`:
-
-- `{{NAMING_CONVENTIONS}}` — pulled from `knowledge/NAMING_CONVENTIONS.md`. The full naming + ESLint reference. Used to generate code that passes lint on first write.
-- `{{NAMING_CONVENTIONS}}` — also from `knowledge/NAMING_CONVENTIONS.md`. Same content; the two keys exist for compatibility with future split if standards diverge from naming.
-- `{{TESTING_RULES}}` — pulled from `knowledge/FRONTEND_REPOSITORY_MANUAL.md` §15. Test setup files, mock locations, run commands.
-- `{{ARCHITECTURE_GRAPH}}` — pulled from `knowledge/graph.json` when seeded; until then, the placeholder explains "graph.json not yet seeded; use lookup-before-invention via the markdown knowledge files + libs/commonlib code."
-
-You don't reference these injection points by name in your output. They're there so your in-context knowledge of Wiboo conventions is always current.
 
 ---
 
