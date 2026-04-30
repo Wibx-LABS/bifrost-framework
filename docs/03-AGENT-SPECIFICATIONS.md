@@ -23,6 +23,26 @@ Each agent is a **markdown template file** that provides instructions and contex
 
 ---
 
+## Deterministic Efficiency Metrics
+
+All agents are measured against three dimensions to ensure predictable, economic performance:
+
+| Metric | Definition | Target | Measurement |
+|--------|-----------|--------|-------------|
+| **Context Density** | Ratio of instruction tokens to total context | < 40% | Calculated post-hydration via sectional extraction metrics |
+| **Turns (Execution Efficiency)** | Number of iterations to complete phase | ≤ 2 per complex task | Tracked in STATE.md; counts redo/retry cycles |
+| **Redos (Determinism)** | Failed attempts due to hydration/instruction errors | 0 | Logged when agent restarts task; indicator of normalization fidelity |
+| **Pattern Density** | Ratio of matched architectural patterns to custom implementations | > 60% for @CodeGen | Validated via `bifrost-graphify-ref` skill; ensures reuse |
+| **Token Efficiency** | Tokens used vs. token_budget allocation | > 90% accuracy | STATE.md tracks `token_usage` vs. `token_budget` |
+
+**Economic Harness Integration**
+- Every feature initializes with explicit `token_budget` in STATE.md
+- Session metrics (`metrics_turns`, `metrics_redos`, `metrics_density`) updated after each agent phase
+- Benchmarking suite (`bifrost-benchmark.js`) validates metrics at initialization, preventing budget overruns
+- Autonomous health monitoring flags sessions exceeding density thresholds for manual review
+
+---
+
 ### @Intake — Feature Scope Analysis
 
 **File:** `Intake_Template.md` → `Intake_HYDRATED.md`

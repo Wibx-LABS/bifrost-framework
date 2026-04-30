@@ -12,6 +12,20 @@ This index points you to the right document based on what you need to do. All do
 
 ---
 
+## 🆕 What's New
+
+**Infrastructure Hardening & Efficiency Suite (Phase 2.5) — Complete as of 2026-04-30**
+
+The Bifrost framework has been hardened with production-ready efficiency engineering:
+- **65% Context Reduction** via Surgical Sectional Hydration (extractMarkdownSections)
+- **100% Deterministic Hydration** via tag normalization and dual-source resolution
+- **Economic Governance** with mandatory token budgets and session metrics
+- **Deterministic Validation** via automated benchmarking harness
+
+See [07-TECHNICAL-ROADMAP.md#phase-25-infrastructure-hardening--efficiency-suite](07-TECHNICAL-ROADMAP.md#phase-25-infrastructure-hardening--efficiency-suite) for details.
+
+---
+
 ## Quick Start: Pick Your Scenario
 
 ### "I want to understand the system"

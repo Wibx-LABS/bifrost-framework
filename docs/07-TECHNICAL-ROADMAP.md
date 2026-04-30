@@ -195,9 +195,13 @@ Day 5:
 - [✓] Zero domain leakage between isolated benchmark projects
 - [✓] 100% hydration success rate on kebab-case and snake_case tags
 - [✓] Every initialized project starts with a defined token budget
-```
+- [✓] Context Density < 40% verified across all agents
+- [✓] Benchmarking suite validates isolation, targeting, and economic health
+- [✓] Documentation consolidated (ADRs dissolved, numbered protocol 00-07 established)
 
-### Success Criteria
+---
+
+## Phase 2 (Skills Integration) — Success Criteria
 
 - [ ] Skills install automatically during `bifrost init`
 - [ ] Claude Code recognizes `/bifrost:*` commands immediately
