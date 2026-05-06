@@ -57,6 +57,39 @@ You do NOT load `bifrost-code-standards`, `bifrost-api-integration`, `bifrost-co
 
 ---
 
+## CODEBASE QUERY WITH SERENA
+
+When locating existing code, use `bifrost-codebase-query` skill with this priority:
+
+1. **If Serena plugin installed:** Use `find_symbol`, `find_referencing_symbols` (instant)
+2. **If Serena unavailable:** Grep fallback (same logic, slightly slower)
+3. **Never load entire directories.** Load specific files only.
+
+Example workflow:
+```
+Task: "Integrate existing EmailService into new notification feature"
+
+WITH SERENA:
+1. Use Serena: find_symbol "EmailService"
+   → src/services/email.ts:15
+2. Use Serena: find_referencing_symbols "EmailService"
+   → src/features/password-reset.ts:42, src/features/notifications.ts:28, ...
+3. Load only: src/services/email.ts + call sites identified above
+   Token cost: ~300 tokens
+
+WITHOUT SERENA (grep):
+1. grep -rn "class EmailService\|export.*EmailService" src/
+   → src/services/email.ts:15
+2. grep -rn "EmailService" src/ | grep -v "class EmailService"
+   → src/features/password-reset.ts:42, src/features/notifications.ts:28, ...
+3. Load only: src/services/email.ts + call sites
+   Token cost: ~400 tokens (same result, slightly slower)
+```
+
+Serena optional; result identical either way.
+
+---
+
 ## What you do (in this exact order)
 
 ### Step 1 — Pre-flight checks (Hard Stop on failure)

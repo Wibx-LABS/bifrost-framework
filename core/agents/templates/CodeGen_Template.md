@@ -80,6 +80,102 @@ You do NOT load:
 
 ---
 
+## CODEBASE QUERY PROTOCOL
+
+When generating code, use `bifrost-codebase-query` to find existing patterns:
+
+1. Query symbol (Serena if available, else grep)
+2. Find references (Serena if available, else grep)
+3. Load targeted files only
+
+See docs/SERENA_USAGE.md for Serena plugin details.
+
+Example workflow:
+
+Task: "Add email notification handler"
+
+CORRECT:
+1. Query: "Find symbol NotificationHandler"
+2. Query: "Find all references to NotificationHandler"
+3. Load: src/handlers/notifications.ts (targeted)
+4. Load: src/types/notification.ts (targeted)
+5. Analyze patterns
+6. Generate new handler following existing patterns
+
+WRONG:
+1. Load src/handlers/ (entire directory, 5000+ tokens)
+2. Load src/types/ (entire directory, 3000+ tokens)
+3. Load src/features/ (entire directory, 10000+ tokens)
+→ 18000 tokens when only 500 needed
+
+---
+
+## EXECUTION BATCHING PROTOCOL
+
+When implementing a feature (triggered by `/bifrost:build`), batch work into reviewable chunks:
+
+### Batch Size Rule
+- **Per batch:** 1-3 files, ≤500 LOC total
+- **Per batch step:** Self-contained, testable, code-reviewable
+- **Checkpoint:** After each batch, pause for review before next batch
+
+Example task breakdown:
+
+```
+PLAN: Create UserProfile feature
+
+Batch 1: Data model + types
+  - src/types/user.ts (UserProfile interface)
+  - src/db/schemas/user.ts (database schema)
+  → Files: 2 | LOC: ~150 | Checkpoint: types locked
+
+Batch 2: API endpoint
+  - src/api/routes/user.ts (GET /user/:id endpoint)
+  - src/api/middleware/auth.ts (auth guard)
+  → Files: 2 | LOC: ~200 | Checkpoint: endpoint reviewable
+
+Batch 3: UI component
+  - src/components/UserProfile.tsx (React component)
+  - src/hooks/useUserProfile.ts (data fetching hook)
+  → Files: 2 | LOC: ~250 | Checkpoint: component reviewable
+
+Batch 4: Tests + integration
+  - tests/api/user.test.ts
+  - tests/components/UserProfile.test.tsx
+  → Files: 2 | LOC: ~300 | Checkpoint: all tests pass
+```
+
+### Checkpoint Review Discipline
+After each batch:
+1. **Code review:** Run bifrost-caveman-review on diff
+2. **Test execution:** Batch-specific tests must pass
+3. **Decision gate:** Proceed to next batch OR fix blocker
+4. **Document:** Update STATE.md with batch completion
+
+### When Batch Size Explodes
+If a batch exceeds 500 LOC or touches 4+ files:
+1. Stop. Do not code further.
+2. Refactor the batch into smaller chunks.
+3. Document why the split was necessary (blocker for Reviewer phase).
+
+---
+
+## Plugin Detection
+
+If Superpowers plugin is installed:
+- Planner can invoke `/brainstorming [feature]` for scaffolding
+- CodeGen can invoke `/execute-plan [feature]` for batch recommendations
+- Reviewer references `/execute-plan` in TDD examples
+
+If Superpowers unavailable:
+- Planner follows brainstorming checklist manually (same discipline, no plugin)
+- CodeGen batches by file/concern boundaries (same rigor, no plugin scaffolding)
+- Reviewer enforces red-phase gate manually (same strictness, no plugin automation)
+
+**Result:** Framework works with or without plugin. Plugin improves UX/scaffolding; framework core remains independent.
+
+---
+
 ## What you do (in this exact order)
 
 ### Step 1 — Pre-flight checks (Hard Stop on failure)

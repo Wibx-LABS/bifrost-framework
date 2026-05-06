@@ -59,6 +59,76 @@ You do NOT load:
 
 ---
 
+## PLANNING METHODOLOGY
+
+Follow structured planning (inspired by Superpowers /brainstorming):
+
+1. **Clarify requirements:** What problem are we solving? Why?
+2. **Explore alternatives:** What are 3 ways to solve this?
+3. **Sketch architecture:** High-level design without implementation details
+4. **Break into tasks:** Atomic, verifiable tasks with clear acceptance criteria
+5. **Document trade-offs:** Why we chose this approach over alternatives
+
+Example output: PLAN.md with clear task breakdown, each task stating:
+- What (1 sentence)
+- Why (context)
+- Acceptance criteria (testable)
+- Estimated tokens
+
+---
+
+## BRAINSTORMING PROTOCOL
+
+When beginning a feature or major task (triggered by `/bifrost:plan` or Intake), enforce structured requirement refinement:
+
+### Phase 1: Clarify the Problem
+- [ ] What problem are we solving? (1 sentence, user-centric)
+- [ ] Why does this matter? (business impact)
+- [ ] Who is affected? (personas)
+- [ ] Acceptance criteria: how do we measure success? (testable, not fuzzy)
+
+**Do not proceed past this phase until criteria are locked.**
+
+### Phase 2: Explore Trade-offs
+- [ ] What are 3 ways to solve this problem?
+- [ ] What does each trade? (cost, speed, maintenance, scope)
+- [ ] Which approach aligns with Bifrost principles?
+- [ ] Document why we picked approach A over B and C.
+
+### Phase 3: Sketch Architecture (No Code)
+- [ ] High-level design: components, data flows, integration points.
+- [ ] Constraints: dependencies, existing patterns to follow, non-negotiables.
+- [ ] Risk checklist: What could go wrong? How do we mitigate?
+
+### Phase 4: Break Into Atomic Tasks
+Each task must have:
+- **What:** 1-sentence, action-oriented (e.g., "Create UserProfile component")
+- **Why:** Context from brainstorming (why this task exists)
+- **Acceptance criteria:** Testable, verifiable, done = verified
+- **Estimated tokens:** rough order-of-magnitude
+
+### Phase 5: Document Trade-offs
+Record the decision: which approach, why, what we rejected.
+→ **Output:** PLAN.md with locked spec and task breakdown.
+
+---
+
+## Plugin Detection
+
+If Superpowers plugin is installed:
+- Planner can invoke `/brainstorming [feature]` for scaffolding
+- CodeGen can invoke `/execute-plan [feature]` for batch recommendations
+- Reviewer references `/execute-plan` in TDD examples
+
+If Superpowers unavailable:
+- Planner follows brainstorming checklist manually (same discipline, no plugin)
+- CodeGen batches by file/concern boundaries (same rigor, no plugin scaffolding)
+- Reviewer enforces red-phase gate manually (same strictness, no plugin automation)
+
+**Result:** Framework works with or without plugin. Plugin improves UX/scaffolding; framework core remains independent.
+
+---
+
 ## What you do (in this exact order)
 
 ### Step 1 — Pre-flight checks (Hard Stop on failure)
