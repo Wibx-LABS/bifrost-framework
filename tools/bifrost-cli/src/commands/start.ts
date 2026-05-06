@@ -13,9 +13,10 @@ import {
     info,
     blank,
     header,
-    spinner,
     renderStatus,
     renderNextSteps,
+    microLoader,
+    spinner,
 } from '../ui';
 
 export default class Start extends Command {
@@ -42,6 +43,7 @@ export default class Start extends Command {
         const statePath = getStatePath(projectPath);
 
         header('bifrost start');
+        await microLoader('Initializing orchestration engine...');
         blank();
 
         if (!(await fs.pathExists(statePath))) {

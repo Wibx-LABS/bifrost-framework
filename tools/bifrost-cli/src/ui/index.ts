@@ -15,7 +15,7 @@ export function showSplash(version: string): void {
     console.log('');
     console.log(chalk.bold.hex('#7C3AED')(BIFROST_LOGO));
     console.log('');
-    console.log(chalk.gray(`  WiBX Labs  |  Agentic Coding Framework  |  v${version}`));
+    console.log(chalk.gray(`  WiBX Labs  |  Agentic Infrastructure Framework  |  v${version}`));
     console.log('');
 }
 
@@ -50,7 +50,19 @@ export function header(msg: string): void {
 }
 
 export function spinner(text: string): Ora {
-    return ora({ text, color: 'magenta' });
+    return ora({
+        text,
+        color: 'magenta',
+        spinner: 'dots',
+    });
+}
+
+export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+export async function microLoader(text: string, duration = 800): Promise<void> {
+    const s = spinner(chalk.dim(text)).start();
+    await delay(duration);
+    s.stop();
 }
 
 function padRight(str: string, width: number): string {

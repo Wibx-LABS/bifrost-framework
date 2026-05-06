@@ -17,7 +17,7 @@ The framework metaphor is a rocket flight. Ignition is the user's raw idea, writ
 
 ## Your first action: read TRAJECTORY.md
 
-Bound by `instructions/decisions/ADR-008-trajectory-context-protocol.md`.
+Bound by the **Rocket Flight Protocol** documented in `docs/01-SYSTEM-ARCHITECTURE.md`.
 
 When you wake into a Bifrost session, **before reading STATE.md, before reading PATIENT.md, before doing anything else, read `.bifrost/TRAJECTORY.md`** (if it exists). It is the locked-at-launch invariant store for the current feature, written by `@Intake` at the conclusion of `/bifrost:start`. It contains:
 
@@ -40,24 +40,24 @@ When you wake into a Bifrost session, **before reading STATE.md, before reading 
 
 ## Gap detection (`@Intake` only)
 
-Bound by `instructions/decisions/ADR-009-bifrost-hr.md`.
+Bound by the **Growth via Skills** protocol in `docs/01-SYSTEM-ARCHITECTURE.md`.
 
 Bifrost's agent roster is **fixed at 7**. The skill library **grows on demand** when a feature surfaces a domain the existing skills don't cover. As `@Intake`, your job during `/bifrost:start` is not just to lock the trajectory — it is also to verify that the skill set is sufficient for the trajectory you're about to lock. A trajectory locked over a coverage gap is a rocket flying with a missing instrument.
 
-After reading `PATIENT.md` and the knowledge layer, but **before** authoring TRAJECTORY.md, ask: *would the agents loading their currently mapped skills produce correct, standards-compliant output for this feature?* The clearest red flags:
+**The Evidence Protocol:** After reading `PATIENT.md`, you MUST perform a **Knowledge Cross-Reference** against the targeted context injected into your own template (`{{api-contracts}}` and `{{component-library}}`). Before authoring TRAJECTORY.md, ask: *would the agents loading their currently mapped skills produce correct, standards-compliant output for this feature given only the verified infrastructure listed in my injected context?* 
+
+The clearest red flags:
 
 - A third-party SDK that's not in `knowledge/TECH_STACK.md` and isn't a generic web standard.
 - A behavior class outside what existing skills carry (real-time collaboration, video processing, payments, AR/VR, ML inference, etc.).
 - A compliance regime the existing skills don't address (PCI-DSS, HIPAA, GDPR-specific flows, SOC2 audit logging).
 - A library swap in a known domain (a non-NgRx state library, a non-Material component, etc.).
 
-If any red flag fires, **load `bifrost-hr`** and follow its bootstrap protocol — extend an existing skill or fork a new one, draft, present in `IMPACT.md` with rationale, Hard Stop for user approval, then commit before TRAJECTORY locks. Do not lock TRAJECTORY over an unresolved gap. Do not silently invent patterns that should be a skill.
+If any red flag fires, **load `bifrost-hr`** and follow its bootstrap protocol. You MUST cite the **Missing Knowledge Cite** (what exactly was searched for in the hydration data but not found) in your `IMPACT.md` proposal. Do not lock TRAJECTORY over an unresolved gap. Do not silently invent patterns that should be a skill.
 
-Borderline calls — a new pattern in an existing domain, a new component variant, a new gotcha — extend the closest peer skill rather than fork. `bifrost-hr` walks the extend-or-fork decision in detail.
+If you're not sure whether something is a gap: perform a targeted lookup via `bifrost-graphify-ref`. If the answer is still "no" in the knowledge layer, it is a gap. Ask the user. Cheap to ask; expensive to spuriously add a skill.
 
-If you're not sure whether something is a gap: ask the user. Cheap to ask; expensive to spuriously add a skill, and equally expensive to lock a trajectory over a coverage hole.
-
-**Mid-flight gaps are NOT bootstrapped.** If `@Planner`, `@CodeGen`, `@QA`, or `@Reviewer` discover a gap that you (`@Intake`) missed, they Hard Stop per ADR-008's trajectory-abort pattern — they do not invoke `bifrost-hr`. The gap returns to you on `@Intake` re-run.
+**Mid-flight gaps are NOT bootstrapped.** If `@Planner`, `@CodeGen`, `@QA`, or `@Reviewer` discover a gap that you (`@Intake`) missed, they Hard Stop per the **Trajectory Abort** pattern — they do not invoke `bifrost-hr`. The gap returns to you on `@Intake` re-run.
 
 ---
 
@@ -103,7 +103,7 @@ Outside these moments, work autonomously per the autonomy level set in `.bifrost
 
 Bound by `instructions/principles/delivery-standards.md` and reinforced via PROJECT_CONTEXT.md.
 
-The Frontend department — the receiving team for every Bifrost-generated feature — has stated three non-negotiable delivery standards. These bind every agent in this framework as peer-level constraints alongside the Three Laws above. They are not internal Bifrost aspirations; they are the spec for what gets accepted at the Backend-merge gate, which directly drives the rework-rate metric and the kill-switch threshold (`docs/planning/operation-bifrost.md`).
+The Frontend department — the receiving team for every Bifrost-generated feature — has stated three non-negotiable delivery standards. These bind every agent in this framework as peer-level constraints alongside the Three Laws above. They are not internal Bifrost aspirations; they are the spec for what gets accepted at the Backend-merge gate, which directly drives the rework-rate metric and the kill-switch threshold (`docs/04-SUCCESS-METRICS.md`).
 
 The three principles, in the receiving team's own words:
 
@@ -148,7 +148,7 @@ If you don't know which agent you are: look at the slash command the user just t
 
 ## Skills you load depend on your role
 
-Every Bifrost agent loads `bifrost-system-context` (this file). The other skills load by role. Read the skill files for any skill in your row. The skill library currently has **9 entries** (8 original + `bifrost-hr` per ADR-009) and grows on demand when `@Intake` invokes `bifrost-hr` to bootstrap a new skill.
+Every Bifrost agent loads `bifrost-system-context` (this file). The other skills load by role. Read the skill files for any skill in your row. The skill library grows on demand when `@Intake` invokes `bifrost-hr` to bootstrap a new skill (see **Growth via Skills** in `docs/01-SYSTEM-ARCHITECTURE.md`).
 
 | Agent | system-context | code-standards | api-integration | component-gen | code-review | qa-validator | graphify-ref | state-management | hr | efficiency |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -171,7 +171,7 @@ What each peer skill carries (full content in `core/skills/<skill-name>/SKILL.md
 - **`bifrost-qa-validator`** — happy-path / sad-path / edge-case scenarios, performance targets (page load < 2s, search < 500ms), a11y checks, mobile responsiveness, API-contract validation against `knowledge/API_CONTRACTS.md`.
 - **`bifrost-graphify-ref`** — how to query the knowledge layer ("what APIs exist for search?", "what pattern do other features use?"), `graph.json` schema (when seeded), the five reference files in `knowledge/`.
 - **`bifrost-state-management`** — STATE.md format and update protocol, NgRx patterns (actions, reducers, selectors, effects), immutable updates.
-- **`bifrost-hr`** — gap detection + skill bootstrap. Loaded by `@Intake` only; runs at `/bifrost:start` after PATIENT.md is read but before TRAJECTORY locks. Walks the extend-or-fork decision when a domain gap is detected, drafts the new skill, Hard Stops for user approval, commits permanently. See "Gap detection" section above and ADR-009.
+- **`bifrost-hr`** — gap detection + skill bootstrap. Loaded by `@Intake` only; runs at `/bifrost:start` after PATIENT.md is read but before TRAJECTORY locks. Walks the extend-or-fork decision when a domain gap is detected, drafts the new skill, Hard Stops for user approval, commits permanently. See "Gap detection" section above.
 - **`bifrost-efficiency`** — developer productivity benchmarks, token usage discipline, speed-to-implementation standards, and "The Gold" (product-to-dev transfer) fidelity.
 
 ---

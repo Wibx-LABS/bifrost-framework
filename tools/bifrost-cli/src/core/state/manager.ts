@@ -26,6 +26,11 @@ function renderState(state: BifrostState): string {
         `autonomy: ${state.autonomy}`,
         `created: ${state.created}`,
         `version: ${state.version}`,
+        `token_budget: ${state.tokenBudget ?? 'unlimited'}`,
+        `token_usage: ${state.tokenUsage ?? 0}`,
+        `metrics_turns: ${state.metrics?.totalTurns ?? 0}`,
+        `metrics_redos: ${state.metrics?.totalRedos ?? 0}`,
+        `metrics_density: ${state.metrics?.averageContextDensity ?? 0}`,
         '---',
     ].join('\n');
 
@@ -140,6 +145,13 @@ function parseState(raw: string): BifrostState {
         autonomy: (data['autonomy'] as AutonomyLevel) ?? AutonomyLevel.TASK_GATED,
         created: String(data['created'] ?? nowIso()),
         version: String(data['version'] ?? nowIso()),
+        tokenBudget: data['token_budget'] === 'unlimited' ? undefined : Number(data['token_budget']),
+        tokenUsage: Number(data['token_usage'] ?? 0),
+        metrics: {
+            totalTurns: Number(data['metrics_turns'] ?? 0),
+            totalRedos: Number(data['metrics_redos'] ?? 0),
+            averageContextDensity: Number(data['metrics_density'] ?? 0),
+        },
         timeline,
         artifacts,
         decisions,
@@ -162,6 +174,13 @@ export async function initializeState(
         autonomy: autonomyLevel,
         created: now,
         version: now,
+        tokenBudget: 500000, // Default 500k tokens
+        tokenUsage: 0,
+        metrics: {
+            totalTurns: 0,
+            totalRedos: 0,
+            averageContextDensity: 0,
+        },
         timeline: [{ timestamp: now, message: 'Feature initialized' }],
         artifacts: [],
         decisions: [],
@@ -267,4 +286,43 @@ export function isComplete(state: BifrostState): boolean {
 
 export function hasBlockers(state: BifrostState): boolean {
     return state.blockers.length > 0;
+}
+
+export async function addTokenUsage(statePath: string, tokens: number): Promise<void> {
+    const state = await readState(statePath);
+    state.tokenUsage = (state.tokenUsage ?? 0) + tokens;
+    
+    if (state.tokenBudget && state.tokenUsage > state.tokenBudget) {
+        const message = `Token budget exceeded: ${state.tokenUsage} / ${state.tokenBudget}`;
+        if (!state.blockers.includes(message)) {
+            state.blockers.push(message);
+        }
+    }
+    
+    await writeState(statePath, state);
+}
+
+export async function recordTurn(statePath: string, instructionTokens: number, dataTokens: number): Promise<void> {
+    const state = await readState(statePath);
+    if (!state.metrics) {
+        state.metrics = { totalTurns: 0, totalRedos: 0, averageContextDensity: 0 };
+    }
+    
+    state.metrics.totalTurns++;
+    const currentDensity = instructionTokens / (instructionTokens + dataTokens);
+    
+    // Update moving average for density
+    state.metrics.averageContextDensity = 
+        (state.metrics.averageContextDensity * (state.metrics.totalTurns - 1) + currentDensity) / state.metrics.totalTurns;
+        
+    await writeState(statePath, state);
+}
+
+export async function recordRedo(statePath: string): Promise<void> {
+    const state = await readState(statePath);
+    if (!state.metrics) {
+        state.metrics = { totalTurns: 0, totalRedos: 0, averageContextDensity: 0 };
+    }
+    state.metrics.totalRedos++;
+    await writeState(statePath, state);
 }

@@ -1,89 +1,42 @@
 {
   "_doc": {
-    "purpose": "Maps {{INJECTION_POINT}} keys to their value sources for bifrost-init hydration. Bound by ADR-006 §Hydration, ADR-008, ADR-010. CLI reads each template, finds {{KEYS}}, looks up values per the mapping below, and writes hydrated copies under .bifrost/.",
-    "value_sources": {
-      "interview": "answer collected by bifrost-init's interview (Path A/B/C in 02-INITIALIZATION.md)",
-      "knowledge": "extracted from a file under projects/bifrost-framework/knowledge/",
-      "computed": "generated at init time (uuid, timestamp, kebab-case slug, etc.)",
-      "agent_fill": "left as a placeholder in the hydrated artifact for an agent to fill at runtime (NOT replaced by the CLI). Currently used for TRAJECTORY locking fields and any field that requires runtime decisions."
-    },
-    "canonical_artifact_set": "Per ADR-010: PATIENT, TRAJECTORY, IMPACT, PLAN, STATE, CODE_REVIEW, QA_REPORT, HANDOFF, VITALS, PROJECT_CONTEXT. HEALTH and AUTONOMY removed (acceptance criteria live in TRAJECTORY §3; autonomy lives in STATE.md frontmatter)."
+    "purpose": "Maps {{injection-point}} keys to their value sources for bifrost-init hydration."
   },
   "_artifact_templates": {
+    "STATE.md": {
+      "id": { "source": "computed", "value": "uuid" },
+      "project-name": { "source": "interview", "key": "project-name" },
+      "status": { "source": "computed", "value": "constant:pending" },
+      "created": { "source": "computed", "value": "iso-timestamp" },
+      "version": { "source": "computed", "value": "framework-version" },
+      "token-budget": { "source": "computed", "value": "constant:500000" }
+    },
     "PATIENT.md": {
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" },
-      "TARGET_APP": { "source": "interview", "key": "target-app" },
-      "AUTHOR": { "source": "interview", "key": "author-name" },
-      "DATE": { "source": "computed", "value": "iso-date" },
-      "TECH_STACK_LOCK": { "source": "knowledge", "file": "TECH_STACK.md", "section": "stack-summary" },
-      "SECURITY_BOUNDARIES_DEFAULT": { "source": "knowledge", "file": "GOTCHAS.md", "section": "security-rules" },
-      "PERF_BUDGETS_DEFAULT": { "source": "knowledge", "file": "TECH_STACK.md", "section": "performance-budgets" }
+      "project-name": { "source": "interview", "key": "project-name" },
+      "target-app": { "source": "interview", "key": "target-app" },
+      "author-name": { "source": "interview", "key": "author-name" },
+      "date": { "source": "computed", "value": "iso-date" }
     },
     "TRAJECTORY.md": {
-      "FEATURE_ID": { "source": "computed", "value": "kebab-case-of-project-name" },
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" },
-      "TARGET_APP": { "source": "interview", "key": "target-app" },
-      "TECH_STACK_LOCK": { "source": "knowledge", "file": "TECH_STACK.md", "section": "stack-summary" },
-      "SECURITY_BOUNDARIES_DEFAULT": { "source": "knowledge", "file": "GOTCHAS.md", "section": "security-rules" },
-      "PERF_BUDGETS_DEFAULT": { "source": "knowledge", "file": "TECH_STACK.md", "section": "performance-budgets" }
-    },
-    "IMPACT.md": {
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" }
-    },
-    "PLAN.md": {
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" },
-      "SCOPE_SUMMARY": { "source": "agent_fill", "filled_by": "@Planner", "from": "IMPACT.md §1 Scope summary" }
-    },
-    "STATE.md": {
-      "ID": { "source": "computed", "value": "uuid" },
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" },
-      "STATUS": { "source": "computed", "value": "constant:pending" },
-      "CREATED": { "source": "computed", "value": "iso-timestamp" },
-      "VERSION": { "source": "computed", "value": "framework-version" }
-    },
-    "CODE_REVIEW.md": {
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" }
-    },
-    "QA_REPORT.md": {
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" }
-    },
-    "HANDOFF.md": {
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" }
-    },
-    "VITALS.md": {
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" }
-    },
-    "PROJECT_CONTEXT.md": {
-      "_note": "PROJECT_CONTEXT.md is project-level, not per-feature. Created once per project at first bifrost-init; not regenerated per feature. If keys are needed, they would come from a project-init flow rather than the per-feature interview."
+      "feature-id": { "source": "computed", "value": "kebab-case-of-project-name" },
+      "project-name": { "source": "interview", "key": "project-name" },
+      "target-app": { "source": "interview", "key": "target-app" }
     }
   },
   "_agent_templates": {
-    "_note": "Agent templates not yet authored. Pedro's next pass. The keys below are placeholders for the template-writing phase.",
     "Intake_Template.md": {
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" },
-      "TARGET_APP": { "source": "interview", "key": "target-app" },
-      "TARGET_PATH": { "source": "interview", "key": "target-path" },
-      "TECH_STACK": { "source": "knowledge", "file": "TECH_STACK.md" },
-      "API_BASE_URL": { "source": "knowledge", "file": "API_CONTRACTS.md", "section": "base-urls" },
-      "COMPONENT_LIBRARY": { "source": "knowledge", "file": "COMPONENT_LIBRARY.md" },
-      "KNOWN_GOTCHAS": { "source": "knowledge", "file": "GOTCHAS.md" }
-    },
-    "Planner_Template.md": {
-      "PROJECT_NAME": { "source": "interview", "key": "project-name" },
-      "SCOPE_SUMMARY": { "source": "agent_fill", "filled_by": "@Intake", "from": "IMPACT.md §1" }
+      "project-name": { "source": "interview", "key": "project-name" },
+      "target-app": { "source": "interview", "key": "target-app" },
+      "tech-stack": { "source": "knowledge", "file": "TECH_STACK.md" },
+      "manual-core": { "source": "knowledge", "file": "FRONTEND_REPOSITORY_MANUAL.md", "sections": ["1", "2"] },
+      "api-contracts": { "source": "knowledge", "file": "API_CONTRACTS.md" },
+      "component-library": { "source": "knowledge", "file": "COMPONENT_LIBRARY.md" }
     },
     "CodeGen_Template.md": {
-      "NAMING_CONVENTIONS": { "source": "knowledge", "file": "NAMING_CONVENTIONS.md" },
-      "CODE_STANDARDS": { "source": "knowledge", "file": "NAMING_CONVENTIONS.md" },
-      "TESTING_RULES": { "source": "knowledge", "file": "FRONTEND_REPOSITORY_MANUAL.md", "section": "testing" },
-      "ARCHITECTURE_GRAPH": { "source": "knowledge", "file": "graph.json" }
-    },
-    "QA_Template.md": {
-      "ACCEPTANCE_CRITERIA": { "source": "agent_fill", "filled_by": "@Intake", "from": "TRAJECTORY.md §3" },
-      "TEST_PATTERNS": { "source": "knowledge", "file": "FRONTEND_REPOSITORY_MANUAL.md", "section": "testing" }
-    },
-    "Conductor_Template.md": {
-      "_note": "Conductor reads STATE.md schema directly from bifrost-state-management Section A; no separate STATE_FORMAT injection needed. Autonomy level lives in STATE.md frontmatter (per ADR-010), not as a separate injection."
+      "manual-patterns": { "source": "knowledge", "file": "FRONTEND_REPOSITORY_MANUAL.md", "sections": ["2", "7", "13"] },
+      "testing-rules": { "source": "knowledge", "file": "FRONTEND_REPOSITORY_MANUAL.md", "sections": ["15"] },
+      "api-contracts": { "source": "knowledge", "file": "API_CONTRACTS.md" },
+      "component-library": { "source": "knowledge", "file": "COMPONENT_LIBRARY.md" }
     }
   }
 }

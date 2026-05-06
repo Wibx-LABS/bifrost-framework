@@ -2,8 +2,7 @@
 HANDOFF.md — @Reviewer's Backend delivery summary. Leads with Trajectory restatement.
 
 Bound by:
-  - ADR-006 §Decision §4 ("HANDOFF.md leads with a Trajectory section restating the locked invariants")
-  - ADR-008 §3 + §4 (Trajectory acknowledged + handoff contract)
+  - **Core Invariants** (Lifecycle & Trajectory) in `docs/architecture.md`.
   - ADR-010 (canonical 10-artifact set; HANDOFF is the user-facing terminus)
   - bifrost-code-review §6 (HANDOFF must be substantive, not stub)
   - bifrost-state-management §A (final STATE.md update accompanies HANDOFF)

@@ -61,6 +61,75 @@ You do NOT load:
 
 ---
 
+## REVIEW OUTPUT FORMAT: caveman-review
+
+When producing CODE_REVIEW.md findings:
+
+Use **bifrost-caveman-review** skill. Format:
+
+L<line>: <emoji> <severity>: <problem>. <fix>.
+
+Examples:
+
+L42: 🔴 bug: missing null check before .email access. Add guard.
+L89: 🟡 risk: database query could timeout. Add pagination.
+L120: 🔵 nit: test name `testIt` unclear. Rename to `testFormSubmits`.
+
+Security findings (prose exception):
+SQL injection risk on lines 15-50. Input reaches database unescaped.
+Recommend: use parameterized queries (prisma, typeorm) or escape all inputs.
+Reference: OWASP SQL Injection guidelines.
+
+---
+
+## TDD DISCIPLINE: RED-GREEN-REFACTOR
+
+When reviewing code batches (part of bifrost-caveman-review), enforce Red-Green-Refactor:
+
+### Red Phase (Test Must Fail First)
+- [ ] Test exists for the new feature
+- [ ] Test **fails** before the implementation was added (run test on main branch, then add impl)
+- [ ] Failure is specific to the new feature (not a pre-existing bug)
+
+**If test passes before implementation → blocker. Do not approve batch.**
+
+### Green Phase (Implementation Passes)
+- [ ] Run test again after adding implementation
+- [ ] Test **passes**
+- [ ] No other tests regressed (run full suite)
+
+### Refactor Phase (Code Quality)
+- [ ] Code follows project patterns (caveman-lite comments, naming)
+- [ ] No dead code or debugging artifacts left in
+- [ ] Performance acceptable for the use case
+- [ ] Security validated (no injection risks, auth checked)
+
+### Checkpoint: caveman-review Output
+```
+L42: 🔴 bug: test passed before implementation. Move test to main branch, verify fail, then approve.
+L89: 🟡 risk: new endpoint lacks rate limiting. Add middleware before green phase.
+L120: 🔵 nit: variable naming inconsistent. Follow project conventions.
+L150: ✅ green: test fails on main, passes with implementation, no regressions. Approved.
+```
+
+---
+
+## Plugin Detection
+
+If Superpowers plugin is installed:
+- Planner can invoke `/brainstorming [feature]` for scaffolding
+- CodeGen can invoke `/execute-plan [feature]` for batch recommendations
+- Reviewer references `/execute-plan` in TDD examples
+
+If Superpowers unavailable:
+- Planner follows brainstorming checklist manually (same discipline, no plugin)
+- CodeGen batches by file/concern boundaries (same rigor, no plugin scaffolding)
+- Reviewer enforces red-phase gate manually (same strictness, no plugin automation)
+
+**Result:** Framework works with or without plugin. Plugin improves UX/scaffolding; framework core remains independent.
+
+---
+
 ## What you do (in this exact order)
 
 ### Step 1 — Pre-flight checks (Hard Stop on failure)

@@ -10,7 +10,7 @@
 
 | Property        | Value                                                |
 | --------------- | ---------------------------------------------------- |
-| Organization    | Open Source Community                   |
+| Organization    | Open Source Community                                |
 | Framework       | Angular 15                                           |
 | Monorepo Tool   | Nx 16                                                |
 | Package Manager | Yarn 3.5.0 (Berry) — PnP disabled, node_modules mode |
@@ -22,7 +22,7 @@
 ## 2. Repository Structure
 
 ```
-bifrost.frontends/
+frontends/
 ├── apps/
 │   ├── account/          # Auth, user profile, onboarding
 │   ├── business/         # Merchant/enterprise management platform
@@ -624,7 +624,7 @@ A self-contained feature library for all financial operations. Includes its own 
 | `ReceiveComponent`              | Generate receive/QR code      |
 | `StatementComponent`            | Transaction history list      |
 | `StatementDetailsComponent`     | Single transaction detail     |
-| `TransferComponent`             | Initiate Token transfer        |
+| `TransferComponent`             | Initiate Token transfer       |
 | `TransferConfirmationComponent` | Confirm transfer              |
 | `TransferDataComponent`         | Enter transfer amount         |
 | `TransferDestinationComponent`  | Select transfer recipient     |
@@ -638,7 +638,7 @@ A self-contained feature library for all financial operations. Includes its own 
 | `BusinessAssistantHeaderComponent` | Business-mode wallet header        |
 | `ContentComponent`                 | Wallet content layout wrapper      |
 | `EmptyStateComponent`              | Empty state UI for wallet sections |
-| `QuotationModalComponent`          | Token/BRL conversion quotation      |
+| `QuotationModalComponent`          | Token/BRL conversion quotation     |
 
 #### Services
 
@@ -1088,6 +1088,42 @@ yarn test
 nx affected --targets=test
 ```
 
+---
+
+## 10. API Contracts
+
+This section defines the available endpoints per domain.
+
+### Domain: account
+
+### POST api.account.login
+
+Authenticate the user and return a session token.
+
+### GET api.account.profile
+
+Fetch the full user profile details.
+
+### PATCH api.account.updateProfile
+
+Update the user's personal or business profile details.
+
+### Domain: business
+
+### GET api.business.dashboard
+
+Fetch high-level merchant statistics for the dashboard.
+
+### GET api.business.campaigns
+
+List all active and scheduled marketing campaigns.
+
+### POST api.business.createCampaign
+
+Initialize and launch a new marketing campaign.
+
+---
+
 ## 20. Feature Flags
 
 The `Feature` enum in `commonlib` defines all server-side feature flags. These are loaded from the server via `api.system.parameters()` and used to gate functionality.
@@ -1098,8 +1134,6 @@ import { Feature } from 'commonlib';
 // Usage pattern (check if feature is enabled via loaded parameters)
 if (this.parameters.hasFeature(Feature.EXAMPLE_FEATURE)) { ... }
 ```
-
-
 
 ---
 

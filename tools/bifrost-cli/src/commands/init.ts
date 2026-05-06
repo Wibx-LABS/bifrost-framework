@@ -28,7 +28,11 @@ import {
     renderAssetDiscovery,
     renderSetupComplete,
     renderNextSteps,
+    microLoader,
+    delay,
 } from '../ui';
+import { loadKnowledge } from '../core/knowledge/loader';
+import { KnowledgeBase } from '../types';
 import { parsePatientMd, validatePatientAnswers } from '../core/parser/patient';
 
 
@@ -69,16 +73,24 @@ async function checkAssets(projectPath: string): Promise<{ hasAssets: boolean; h
     return { hasAssets, hasInstructions };
 }
 
-async function promptPathA(projectPath: string): Promise<InterrogationAnswers> {
+async function promptPathA(projectPath: string, kb?: KnowledgeBase): Promise<InterrogationAnswers> {
     const config = loadConfig(projectPath);
-    const targetApps = config.targetApps && config.targetApps.length > 0 ? config.targetApps : ['App 1', 'App 2'];
+    
+    let targetApps = config.targetApps && config.targetApps.length > 0 ? config.targetApps : ['App 1', 'App 2'];
+    const mapping = kb?.repositoryMapping || [];
+
+    if (mapping.length > 0) {
+        targetApps = mapping.map(m => m.name);
+    }
 
     const { targetApp } = await prompt<{ targetApp: string }>({
-        type: 'select',
+        type: 'autocomplete',
         name: 'targetApp',
         message: 'Which application are we targeting?',
         choices: targetApps,
     });
+
+    const sections = mapping.find(m => m.name === targetApp)?.sections || [];
 
     const { featureScope } = await prompt<{ featureScope: string }>({
         type: 'select',
@@ -89,18 +101,44 @@ async function promptPathA(projectPath: string): Promise<InterrogationAnswers> {
 
     let targetSection: string | undefined;
     if (featureScope === FeatureScope.UPDATE_EXISTING) {
-        const result = await prompt<{ targetSection: string }>({
-            type: 'input',
-            name: 'targetSection',
-            message: 'Which section? (e.g., "Finance", "Rewards")',
-        });
-        targetSection = result.targetSection;
+        if (sections.length > 0) {
+            const result = await prompt<{ targetSection: string }>({
+                type: 'autocomplete',
+                name: 'targetSection',
+                message: 'Which section? (Type to filter)',
+                choices: [...sections, 'Other (Type manually)'],
+            });
+            
+            if (result.targetSection === 'Other (Type manually)') {
+                const manual = await prompt<{ targetSection: string }>({
+                    type: 'input',
+                    name: 'targetSection',
+                    message: 'Type the section name:',
+                });
+                targetSection = manual.targetSection;
+            } else {
+                targetSection = result.targetSection;
+            }
+        } else {
+            const result = await prompt<{ targetSection: string }>({
+                type: 'input',
+                name: 'targetSection',
+                message: 'Which section? (e.g., "Finance", "Rewards")',
+            });
+            targetSection = result.targetSection;
+        }
     }
+
+    const isKnownStateful = mapping.find(m => m.name === targetApp)?.statefulSections.some(s => 
+        (targetSection && s.toLowerCase().includes(targetSection.toLowerCase())) || 
+        (targetApp === 'wallet')
+    ) || false;
 
     const { needsApiStr } = await prompt<{ needsApiStr: string }>({
         type: 'select',
         name: 'needsApiStr',
         message: 'Does this need to handle/save information?',
+        initial: isKnownStateful ? 0 : 1,
         choices: [
             'Yes (Save/Connect) — requires state management + API patterns',
             'No (Visual Only) — UI only',
@@ -110,38 +148,47 @@ async function promptPathA(projectPath: string): Promise<InterrogationAnswers> {
     const { featureName } = await prompt<{ featureName: string }>({
         type: 'input',
         name: 'featureName',
-        message: 'Feature name?',
+        message: 'What are we working on? (Task/Feature/Fix):',
+        validate: (v) => v.length > 0 || 'Task description is required',
     });
 
     const { featureDescription } = await prompt<{ featureDescription: string }>({
         type: 'input',
         name: 'featureDescription',
-        message: 'Brief description of the feature?',
+        message: 'Brief details (Optional):',
+        initial: (input: any) => {
+            if (featureName.toLowerCase().startsWith('fix')) return 'Bug fix: ' + featureName;
+            if (featureName.toLowerCase().startsWith('refactor')) return 'Technical debt: ' + featureName;
+            return 'Work item: ' + featureName;
+        },
     });
 
     const { businessValue } = await prompt<{ businessValue: string }>({
         type: 'input',
         name: 'businessValue',
-        message: 'Why is this feature needed? (business value/user need)',
+        message: 'Objective (Optional):',
+        initial: 'System maintenance & stability',
     });
 
     const { featureOwner } = await prompt<{ featureOwner: string }>({
         type: 'input',
         name: 'featureOwner',
-        message: 'Who owns this feature? (email or name)',
+        message: 'Point of Contact (Optional):',
+        initial: 'caiosobrinho',
     });
 
     const { constraints } = await prompt<{ constraints: string }>({
         type: 'input',
         name: 'constraints',
-        message: 'Any known constraints or gotchas? (optional)',
+        message: 'Constraints (Optional):',
+        initial: 'None',
     });
 
     const { timeline } = await prompt<{ timeline: string }>({
         type: 'input',
         name: 'timeline',
-        message: 'Timeline? (e.g., "2 weeks", "Sprint 14")',
-        initial: '2 weeks',
+        message: 'Timeline (Optional):',
+        initial: 'TBD',
     });
 
     return {
@@ -442,7 +489,21 @@ export default class Init extends Command {
 
         showSplash(PACKAGE_VERSION);
 
+        let kb: KnowledgeBase | undefined;
+        try {
+            info(`Loading knowledge from: ${config.knowledgePath}`);
+            kb = await loadKnowledge(config.knowledgePath);
+            if (kb.repositoryMapping.length === 0) {
+                warn('Knowledge loaded but no application surfaces were mapped. Check FRONTEND_REPOSITORY_MANUAL.md structure.');
+            } else {
+                success(`Mapped ${kb.repositoryMapping.length} application surfaces.`);
+            }
+        } catch (err) {
+            warn(`Knowledge Layer not found at ${config.knowledgePath}. Using defaults.`);
+        }
+
         header('Step 1: Checking prerequisites');
+        await microLoader('Validating environment...');
         await checkPrerequisites(projectPath);
 
         const bifrostDir = getBifrostDir(projectPath);
@@ -461,11 +522,13 @@ export default class Init extends Command {
 
         blank();
         header('Step 2: Searching for assets');
+        await microLoader('Scanning for project assets...');
         const { hasAssets, hasInstructions } = await checkAssets(projectPath);
         renderAssetDiscovery(hasAssets, hasInstructions);
 
         blank();
         header('Step 3: Interview');
+        await microLoader('Preparing interrogation protocol...');
         blank();
 
         let answers: InterrogationAnswers | undefined;
@@ -501,7 +564,7 @@ export default class Init extends Command {
             });
 
             if (destinationPath.startsWith('[A]')) {
-                answers = await promptPathA(projectPath);
+                answers = await promptPathA(projectPath, kb);
             } else if (destinationPath.startsWith('[B]')) {
                 answers = await promptPathB(projectPath);
             } else {

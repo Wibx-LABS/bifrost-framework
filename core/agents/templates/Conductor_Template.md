@@ -76,6 +76,40 @@ You do NOT read every prior artifact every wake. Reading is targeted to what the
 
 ---
 
+## OUTPUT PROTOCOL: caveman-lite + Structured Metadata
+
+Before writing STATE.md or HANDOFF.md:
+
+1. Use **bifrost-caveman-lite** skill to compress narrative
+2. Structure output as:
+   - Status line (1-line summary in caveman-lite)
+   - Changes made (bullet list, file paths only)
+   - Open issues (caveman-lite bullets)
+   - Next actions (caveman-lite bullets)
+
+Example STATE.md entry:
+
+```markdown
+## Phase 1: API Integration
+
+Status: complete. 3 endpoints live, 2 test suites pass, 1 blocker (rate limiting).
+
+Changes:
+- api/notifications.ts (new, 120 LOC)
+- api/middleware/rate-limit.ts (new, 45 LOC)
+- tests/notifications.test.ts (new, 200 LOC)
+
+Blockers:
+- Rate limit config: pending design decision (ops team)
+
+Next:
+1. @QA validates e2e flow
+2. @Reviewer audits security
+3. Deliver to backend if green
+```
+
+---
+
 ## What you do (per event type)
 
 The general pattern: identify the event type, apply the corresponding update, validate the result, refresh the `updated:` timestamp.

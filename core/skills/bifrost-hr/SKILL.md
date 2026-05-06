@@ -5,7 +5,7 @@ description: Gap detection + skill bootstrap. Use this skill whenever you are @I
 
 # bifrost-hr — gap detection and skill bootstrap
 
-Bound by `instructions/decisions/ADR-009-bifrost-hr.md`. Read alongside `bifrost-system-context` and ADR-008 (trajectory protocol).
+Bound by the **Growth via Skills** protocol in `docs/architecture.md`.
 
 You (`@Intake`) load this skill at `/bifrost:start`, after reading PATIENT.md + the knowledge layer + PROJECT_CONTEXT.md, **before** locking TRAJECTORY.md. Your job here is to ask: *do my currently loaded skills cover the domain this feature touches, or is there a gap?* If the existing skill set is sufficient, you're done with this skill — proceed to lock TRAJECTORY. If it isn't, you run the bootstrap protocol below.
 
@@ -13,9 +13,11 @@ This skill exists because Bifrost is narrower than FORGE: 7 lifecycle agents cov
 
 ---
 
-## Step 1: Detect the gap
+## Step 1: Detect the gap (Evidence-Based Protocol)
 
-After reading PATIENT.md, ask yourself: *would any of the agent×skill matrix entries below produce correct, standards-compliant output for this feature given only the skills they currently load?*
+After reading PATIENT.md, you MUST perform a **Knowledge Cross-Reference** against the targeted context injected into your own template (`{{api-contracts}}` and `{{component-library}}`).
+
+Ask yourself: *would any of the agent×skill matrix entries below produce correct, standards-compliant output for this feature given only the skills they currently load AND the verified infrastructure listed in my injected context?*
 
 The 8 original skills (drafted at framework genesis) cover:
 
@@ -48,7 +50,13 @@ Things that are **not gaps** (no action):
 - Knowledge-layer lookup that returns the answer (the patterns exist, you just hadn't read that specific section yet).
 - A feature using all the same libraries Wiboo already uses, just in a new combination.
 
-If you're unsure whether something is a gap, ask the user before invoking the bootstrap. Cheap to ask; expensive to spuriously add a new skill.
+If you're unsure whether something is a gap, perform a targeted lookup via `bifrost-graphify-ref`. If the answer is still "no" in the knowledge layer, it is a gap. Ask the user before invoking the bootstrap. Cheap to ask; expensive to spuriously add a new skill.
+
+### The Evidence Protocol
+You cannot claim a gap simply because you "don't know" how to do it. You must cite:
+1.  **Missing Endpoint**: Search `{{api-contracts}}`. If the domain lacks the necessary HTTP contract, the gap is in `bifrost-api-integration` or requires a new domain skill.
+2.  **Missing Component**: Search `{{component-library}}`. If the domain lacks the base UI blocks, the gap is in `bifrost-component-gen`.
+3.  **Missing Pattern**: Search `knowledge/TECH_STACK.md` and `GOTCHAS.md`. If the technology/constraint is absent, the gap is in the skill set.
 
 ---
 
@@ -109,6 +117,8 @@ Write a `## bifrost-hr proposal` block in your `IMPACT.md` (yes, before TRAJECTO
 - <bullet>
 
 **Loaded by:** <list of agents>
+
+**Missing Knowledge Cite:** <Explicit reference to what was missing in `{{api-contracts}}` or `{{component-library}}` that proves this gap is real>
 
 **Draft:** <link to the draft, or inline if short>
 

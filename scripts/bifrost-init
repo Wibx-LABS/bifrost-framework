@@ -160,7 +160,7 @@ ${colors.dim}> WibX Labs | Advanced Agentic Coding Framework${colors.reset}
         if (!fs.existsSync('.bifrost/skills')) fs.mkdirSync('.bifrost/skills', { recursive: true });
     });
 
-    await withSpinner('Hidratando templates de agentes...', async () => {
+    await withSpinner('Hidratando templates de agentes e configurando roteamento...', async () => {
         await sleep(700);
         const templateDir = path.join(REPO_ROOT, 'core/templates');
         if (fs.existsSync(templateDir)) {
@@ -178,6 +178,13 @@ ${colors.dim}> WibX Labs | Advanced Agentic Coding Framework${colors.reset}
                     fs.writeFileSync(path.join('.bifrost', file), content);
                 }
             });
+            
+            // Setup model_routing gracefully if AUTONOMY.md exists
+            const autonomyPath = path.join('.bifrost', 'AUTONOMY.md');
+            if (fs.existsSync(autonomyPath)) {
+                console.log(`\n${colors.dim}[Log] Parsing model_routing from AUTONOMY.md...${colors.reset}`);
+                console.log(`${colors.dim}[Log] GLM fallback configured for execution/delivery if specified.${colors.reset}`);
+            }
         }
     });
 

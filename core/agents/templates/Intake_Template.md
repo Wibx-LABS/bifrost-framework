@@ -40,7 +40,53 @@ You do NOT load `bifrost-code-standards`, `bifrost-api-integration`, `bifrost-co
 
 4. **`.bifrost/STATE.md`** — should show `status: pending`, `autonomy: <level>`. Note the autonomy level — it affects how many approval gates you'll request.
 
-5. **You do NOT read TRAJECTORY.md** — it doesn't exist yet. You're about to write it. This is the only lifecycle phase where the read-TRAJECTORY-first protocol from ADR-008 §3 doesn't apply, by design.
+5. **You do NOT read TRAJECTORY.md** — it doesn't exist yet. You're about to write it. This is the only lifecycle phase where the read-TRAJECTORY-first protocol from the **Rocket Flight Protocol** doesn't apply, by design.
+
+---
+
+## Targeted Domain Knowledge
+
+### API Contracts
+{{api-contracts}}
+
+### Component Library
+{{component-library}}
+
+### Repository Manual (Core Sections)
+{{manual-core}}
+
+---
+
+## CODEBASE QUERY WITH SERENA
+
+When locating existing code, use `bifrost-codebase-query` skill with this priority:
+
+1. **If Serena plugin installed:** Use `find_symbol`, `find_referencing_symbols` (instant)
+2. **If Serena unavailable:** Grep fallback (same logic, slightly slower)
+3. **Never load entire directories.** Load specific files only.
+
+Example workflow:
+```
+Task: "Integrate existing EmailService into new notification feature"
+
+WITH SERENA:
+1. Use Serena: find_symbol "EmailService"
+   → src/services/email.ts:15
+2. Use Serena: find_referencing_symbols "EmailService"
+   → src/features/password-reset.ts:42, src/features/notifications.ts:28, ...
+3. Load only: src/services/email.ts + call sites identified above
+   Token cost: ~300 tokens
+
+WITHOUT SERENA (grep):
+1. grep -rn "class EmailService\|export.*EmailService" src/
+   → src/services/email.ts:15
+2. grep -rn "EmailService" src/ | grep -v "class EmailService"
+   → src/features/password-reset.ts:42, src/features/notifications.ts:28, ...
+3. Load only: src/services/email.ts + call sites
+   Token cost: ~400 tokens (same result, slightly slower)
+```
+
+Serena optional; result identical either way.
 
 ---
 
@@ -128,7 +174,7 @@ Use `core/templates/TRAJECTORY.md` (already hydrated to `.bifrost/TRAJECTORY.md`
 
 **§1 Feature identity** — feature name, one-paragraph scope statement (paraphrase IMPACT §1), in-scope binary list, out-of-scope binary list. The binary lists are CONTRACTS — what's listed in/out is exactly what's in/out. Don't hedge with "and similar things." Be explicit.
 
-**§2 Hard constraints** — start from `{{TECH_STACK}}`, `{{SECURITY_BOUNDARIES_DEFAULT}}`, `{{PERF_BUDGETS_DEFAULT}}` (already hydrated). Append feature-specific entries:
+**§2 Hard constraints** — reference the versions in `knowledge/TECH_STACK.md`. Append feature-specific entries:
 - Tech stack: any feature-specific stack constraints beyond the project default.
 - Security: any auth/data-classification specifics from PATIENT §4.
 - Performance: feature-specific budgets (LCP, action latency, bundle delta).
@@ -240,20 +286,6 @@ These are explicit anti-protocols. Each corresponds to a real failure mode.
 - **Do not skip writing IMPACT.md.** Even if scope feels obvious. IMPACT.md is `@Planner`'s primary read; without it, `@Planner` is reading TRAJECTORY (which is invariants only) and inventing the analysis you didn't do.
 - **Do not sign STATE.md updates as `merged`.** That's the terminus, three agents away. Your terminus is `planning`.
 - **Do not invoke `@Planner` yourself.** The approval gate is the user's. Wait.
-
----
-
-## Hydration injection points
-
-The following will be filled in by `bifrost-init` when this template gets hydrated to `.bifrost/agents/Intake_HYDRATED.md`:
-
-- `{{PROJECT_NAME}}` — the feature name from interview.
-- `{{TARGET_APP}}` — which Wiboo app (`account` | `business` | `shopping` | `wibxgo`) per ADR-007.
-- `{{TARGET_PATH}}` — the source path the feature lives in.
-- `{{TECH_STACK}}` — pulled from `knowledge/TECH_STACK.md`. The version lock you reference in TRAJECTORY §2.
-- `{{API_BASE_URL}}` — pulled from `knowledge/API_CONTRACTS.md` when seeded; until then, the endpoint factory in `libs/commonlib/src/lib/constants/api.ts`.
-- `{{COMPONENT_LIBRARY}}` — pulled from `knowledge/COMPONENT_LIBRARY.md`. The catalogue of `app-*` components.
-- `{{GOTCHAS}}` — pulled from `knowledge/GOTCHAS.md`. The known issues you reference when populating TRAJECTORY §5 Prior incidents.
 
 ---
 

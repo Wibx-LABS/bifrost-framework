@@ -16,6 +16,7 @@ const KNOWLEDGE_FILES = {
     NAMING_CONVENTIONS: 'NAMING_CONVENTIONS.md',
     TECH_STACK: 'TECH_STACK.md',
     GOTCHAS: 'GOTCHAS.md',
+    REPOSITORY_MANUAL: 'FRONTEND_REPOSITORY_MANUAL.md',
 } as const;
 
 function extractSections(content: string): Map<string, string> {
@@ -48,13 +49,13 @@ function extractSections(content: string): Map<string, string> {
 
 function parseApiContracts(content: string): ApiContract[] {
     const apis: ApiContract[] = [];
-    const domainBlocks = content.split(/^## Domain:/m).filter((b) => b.trim());
+    const domainBlocks = content.split(/^#+\s+Domain:/m).filter((b) => b.trim());
 
     for (const block of domainBlocks) {
         const domainMatch = block.match(/^[`']?([^`'\n(]+)/);
-        const domain = domainMatch ? domainMatch[1].trim() : 'unknown';
+        const domain = domainMatch ? domainMatch[1].trim().toLowerCase() : 'unknown';
 
-        const endpointRegex = /###\s+(GET|POST|PUT|PATCH|DELETE)\s+(\S+)\n+([\s\S]*?)(?=###|$)/g;
+        const endpointRegex = /###\s+(GET|POST|PUT|PATCH|DELETE)\s+(\S+)\n+([\s\S]*?)(?=###|^#+|$)/g;
         let match: RegExpExecArray | null;
 
         while ((match = endpointRegex.exec(block)) !== null) {
@@ -182,12 +183,91 @@ function parseGotchas(content: string): Gotcha[] {
     return gotchas;
 }
 
+function parseRepositoryMapping(content: string): any[] {
+    const apps: any[] = [];
+    
+    // 1. Parse Apps (Section 5)
+    const appSection = content.split('## 5. Applications In-Depth')[1]?.split('## 6. Shared Libraries')[0];
+    if (appSection) {
+        const appBlocks = appSection.split(/^###\s+5\.\d+/m).filter(b => b.trim());
+        for (const block of appBlocks) {
+            const nameMatch = block.match(/^\s*`?(\w+)`?/);
+            if (!nameMatch) continue;
+            const name = nameMatch[1];
+            
+            // Try to find container tree
+            const treeMatch = block.match(/\*\*Container structure[^*]*\*\*:\n+```\n+containers\/\n+([\s\S]*?)```/);
+            let sections: string[] = [];
+            let statefulSections: string[] = [];
+            
+            // Detect stateful sections from NgRx tables
+            const storeTableMatch = block.match(/\| Slice\s+\| Purpose\s+\|\n\|[-|\s]+\|\n([\s\S]*?)(?=\n\n|\n[^|]|$)/);
+            if (storeTableMatch) {
+                statefulSections = storeTableMatch[1]
+                    .split('\n')
+                    .map(line => line.split('|')[1]?.trim().replace(/`/g, ''))
+                    .filter((s): s is string => !!s);
+            }
+
+            if (treeMatch) {
+                sections = treeMatch[1]
+                    .split('\n')
+                    .map(line => {
+                        const m = line.match(/[├└]──\s+([^/]+)\//);
+                        return m ? m[1].trim() : null;
+                    })
+                    .filter((s): s is string => !!s && s !== 'home' && s !== 'personal');
+            } else {
+                // Fallback: extract from "Key features" list
+                const featureMatch = block.match(/\*\*Key features\*\*:\n+([\s\S]*?)(?=\n\n|\n\*\*)/);
+                if (featureMatch) {
+                    sections = featureMatch[1]
+                        .split('\n')
+                        .map(line => line.match(/-\s+([^(]+)/)?.[1]?.trim())
+                        .filter((s): s is string => !!s)
+                        .map(s => s.toLowerCase().replace(/\s+/g, '-'));
+                }
+            }
+            
+            apps.push({ 
+                name, 
+                sections: [...new Set([...sections, ...statefulSections])],
+                statefulSections: [...new Set(statefulSections)],
+            });
+        }
+    }
+
+    // 2. Parse Libraries (Section 6)
+    const libSection = content.split('## 6. Shared Libraries')[1]?.split('## 7. State Management')[0];
+    if (libSection) {
+        const libBlocks = libSection.split(/^###\s+6\.\d+/m).filter(b => b.trim());
+        for (const block of libBlocks) {
+            const nameMatch = block.match(/^\s*`?(\w+)`?/);
+            if (!nameMatch) continue;
+            const name = nameMatch[1];
+            
+            // Extract #### headers as sections (e.g., Components, Services)
+            const sections = (block.match(/^####\s+\d+\.\d+\.\d+\s+([^\n]+)/gm) || [])
+                .map(s => s.replace(/^####\s+\d+\.\d+\.\d+\s+/, '').trim());
+            
+            apps.push({ 
+                name, 
+                sections,
+                statefulSections: name === 'wallet' ? sections : [], // Wallet is always stateful
+            });
+        }
+    }
+
+    return apps;
+}
+
 function buildKnowledgeBase(
     apis: ApiContract[],
     components: ComponentDef[],
     conventions: NamingRules,
     stack: TechStackInfo,
     gotchas: Gotcha[],
+    repositoryMapping: any[],
     rawFiles: Record<string, string>,
 ): KnowledgeBase {
     return {
@@ -196,6 +276,7 @@ function buildKnowledgeBase(
         conventions,
         stack,
         gotchas,
+        repositoryMapping,
         rawFiles,
 
         findApiByDomain(domain: string): ApiContract[] {
@@ -248,11 +329,15 @@ export async function loadKnowledge(knowledgePath: string): Promise<KnowledgeBas
         }
     }
 
-    const apis = parseApiContracts(rawFiles.API_CONTRACTS);
+    const apis = [
+        ...parseApiContracts(rawFiles.API_CONTRACTS),
+        ...parseApiContracts(rawFiles.REPOSITORY_MANUAL),
+    ];
     const components = parseComponents(rawFiles.COMPONENT_LIBRARY);
     const conventions = parseNamingConventions(rawFiles.NAMING_CONVENTIONS);
     const stack = parseTechStack(rawFiles.TECH_STACK);
     const gotchas = parseGotchas(rawFiles.GOTCHAS);
+    const mapping = parseRepositoryMapping(rawFiles.REPOSITORY_MANUAL);
 
-    return buildKnowledgeBase(apis, components, conventions, stack, gotchas, rawFiles);
+    return buildKnowledgeBase(apis, components, conventions, stack, gotchas, mapping, rawFiles);
 }

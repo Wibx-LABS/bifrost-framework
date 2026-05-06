@@ -113,6 +113,12 @@ export interface TechStackInfo {
     rawContent: string;
 }
 
+export interface AppSurface {
+    name: string;
+    sections: string[];
+    statefulSections: string[];
+}
+
 export interface Gotcha {
     severity: 'error' | 'warning' | 'info';
     title: string;
@@ -125,6 +131,7 @@ export interface KnowledgeBase {
     conventions: NamingRules;
     stack: TechStackInfo;
     gotchas: Gotcha[];
+    repositoryMapping: AppSurface[];
     rawFiles: Record<string, string>;
 
     findApiByDomain(domain: string): ApiContract[];
@@ -193,6 +200,13 @@ export interface BifrostState {
     autonomy: AutonomyLevel;
     created: string;
     version: string;
+    tokenBudget?: number;
+    tokenUsage?: number;
+    metrics: {
+        totalTurns: number;
+        averageContextDensity: number; // Instruction/Data ratio
+        totalRedos: number;
+    };
     timeline: TimelineEntry[];
     artifacts: ArtifactEntry[];
     decisions: string[];

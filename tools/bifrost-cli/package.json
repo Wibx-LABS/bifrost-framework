@@ -1,7 +1,7 @@
 {
   "name": "@bifrost/cli",
   "version": "1.0.0",
-  "description": "Bifrost CLI — AI agent orchestration for feature development",
+  "description": "Bifrost CLI — Feature orchestration infrastructure for AI agents",
   "keywords": [
     "bifrost",
     "cli",

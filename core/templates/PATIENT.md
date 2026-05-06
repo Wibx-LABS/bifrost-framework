@@ -1,9 +1,7 @@
 <!--
 PATIENT.md — Product-authored feature scope. The "admission record."
 
-Bound by ADR-006 (Feature lifecycle) and ADR-008 (Trajectory protocol). See:
-  instructions/decisions/ADR-006-feature-lifecycle.md
-  instructions/decisions/ADR-008-trajectory-context-protocol.md
+Bound by the **Core Invariants** and **Rocket Flight Protocol** documented in `docs/architecture.md`.
 
 WHAT THIS IS
   This is your input as Product. You write this; @Intake reads it and

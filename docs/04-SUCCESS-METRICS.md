@@ -217,12 +217,12 @@ Track these weekly or monthly to ensure Bifrost stays healthy.
 bifrost-metrics --since "7 days"
 
 # Shows:
-| Feature | Velocity | Backend Changes | QA Passed | Agent Accuracy |
-|---------|----------|-----------------|-----------|----------------|
-| search  | 4.2h     | 8%              | PASS ✓    | 99%            |
-| notify  | 5.1h     | 12%             | PASS ✓    | 96%            |
-| upload  | 3.8h     | 5%              | PASS ✓    | 99%            |
-| avg     | 4.4h     | 8.3%            | 100%      | 98%            |
+| Feature | Velocity | Backend Changes | QA Passed | Instruction Adherence |
+|---------|----------|-----------------|-----------|-----------------------|
+| search  | 4.2h     | 8%              | PASS ✓    | 99%                   |
+| notify  | 5.1h     | 12%             | PASS ✓    | 96%                   |
+| upload  | 3.8h     | 5%              | PASS ✓    | 99%                   |
+| avg     | 4.4h     | 8.3%            | 100%      | 98%                   |
 ```
 
 **Action:** If Backend changes % > 15%, investigate which skill needs updating.
@@ -313,7 +313,7 @@ RED FLAG: "bifrost-metrics shows 0 features this month"
 
 ## See Also
 
-- [implementation-plan-PLAN.md](implementation-plan-PLAN.md) — How to build the framework
-- [strategy.md](strategy.md) — Business case + ROI
+- [07-TECHNICAL-ROADMAP.md](07-TECHNICAL-ROADMAP.md) — How to build the framework
+- [06-BUSINESS-STRATEGY.md](06-BUSINESS-STRATEGY.md) — Business case + ROI
 - **[Technical Roadmap & Visual Architecture.md](../Technical%20Roadmap%20%26%20Visual%20Architecture.md)** — Original detailed source (success definition, risks)
 - **[Operation Bifrost.md](../Operation%20Bifrost.md)** — Original detailed source (business metrics, ROI)

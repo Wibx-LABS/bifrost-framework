@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
@@ -10,6 +9,7 @@ build/
 *.tsbuildinfo
 
 # Testing
+scratch/
 coverage/
 .nyc_output/
 *.lcov
