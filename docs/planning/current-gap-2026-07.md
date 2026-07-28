@@ -39,6 +39,21 @@ Agentes + skills + init existem (Fases 1-2 ~ok). **O que falta é fazer RODAR de
 - Phase 0 FEITA: CLI compila (removidos barrel re-exports mortos + apagado `core/commands/` stub).
 - Pendente: dedup das 3 impls de state (`runtime/state-manager.js`, `core/agents/hydration/hydrate.js` vs `src/core/state/manager.ts`); consertar testes quebrados; decidir targeting Antigravity.
 
+## ⚠️ Correção empírica (2026-07-28, ao executar Fase 0+4)
+
+Rodar o código corrigiu 3 premissos errados desta análise:
+
+1. **A ponte `/bifrost:*` NÃO está "inexistente".** É o **sistema de skills**, que EXISTE: os 7 agentes são skills (`core/agents/templates/*_Template.md` têm frontmatter `name: bifrost-intake/planner/...` e disparam em `/bifrost:start` etc.); `bifrost-system-context/SKILL.md` roteia comando→agente; o `installClaudeSkills` (init.ts) copia skills + agentes hidratados pro `~/.claude/skills/`. Os stubs `core/commands/*.js` (apagados na Phase 0) eram um design ABANDONADO, não a ponte real.
+2. **O CLI RODA e o init SCAFFOLDA.** `bifrost init` cria o `.bifrost/` completo (IMPACT/STATE/PLAN/PATIENT/CODE_REVIEW/QA_REPORT/HEALTH/HANDOFF/AUTONOMY). Provado empiricamente num dir temp.
+3. **State impls não são duplicatas** (ver RESCOPE_NOTES.md) — camadas distintas (runtime JS p/ hooks vs TS do CLI).
+
+**O que isso muda:** a Fase 4 ("construir a ponte") é em grande parte MISDIAGNÓSTICO — a ponte existe. O gap real encolhe e se desloca:
+- **Não confirmado** (bloqueado por prompt interativo do init na automação): hidratação dos agentes + install das skills rodando ponta-a-ponta. Precisa de 1 run interativo real do `init`.
+- **O teste que importa** é de SESSÃO: as skills `/bifrost:*` de fato levam @Intake→@CodeGen→...→PR num Claude Code real? Isso É o **piloto (Fase 9)** — não dá pra provar sem rodar uma sessão real.
+- **Genuinamente falta** (menor): Fase 3 (ligar loader ao knowledge), Fase 7 (3 exemplos), Fase 8 (métrica de rework real), testes reconstruídos.
+
+**Novo caminho crítico honesto:** (a) 1 `init` interativo p/ confirmar hidratação+install; (b) rodar 1 feature dummy numa sessão Claude Code p/ ver as skills dispararem; (c) reconstruir testes contra a API real; (d) Fase 9 piloto (o gate, precisa Vizmos+Gabriel). "Construir a ponte" sai do caminho crítico.
+
 ## O que NÃO falta
 
 Fase 1 está sólida: os 7 agentes e 9 skills estão escritos e sérios; o init/hydration é real. O design inteiro (Fases 1-10) está documentado. O buraco é **execução da Fase 4 pra frente**, não design.
