@@ -383,6 +383,7 @@ When `@CodeGen` finishes a task, walk this before producing `CODE_REVIEW.md`. Wh
 - [ ] All component selectors are `app-<kebab>`.
 - [ ] No interface starts with `I`.
 - [ ] DTOs are the only place snake_case appears; models are camelCase; adapter exists for every DTO that crosses into a model.
+- [ ] **Shared existing files (root store, i18n dictionaries, barrels, route tables) are emitted as `// bifrost:add` additive diffs with an insertion anchor — never as full-file bodies** (per @CodeGen's Shared-file additive-diff rule). Full-file output of a shared file is an automatic review FAIL.
 - [ ] 4-space indent, single quotes, semicolons, Allman braces, max 140 chars per line.
 - [ ] No `var`; no `any`; no non-null assertions; no `console.log`.
 - [ ] No function exceeds cyclomatic complexity 4. (If it does, decompose.)

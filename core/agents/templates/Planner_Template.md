@@ -70,6 +70,8 @@ Verify the lifecycle is in the expected state:
 - **`STATE.md` shows `status: planning`** OR `intake` (not yet rolled forward by `@Conductor`). If `coding` / `qa` / `review` / `merged`, the lifecycle has moved past you — do not re-author PLAN. Hard Stop and surface to user.
 - **`PLAN.md` does NOT yet exist** OR is just the unhydrated template. If PLAN.md exists with substantive content, you are NOT in a fresh-planning scenario. Hard Stop: "PLAN.md is already authored. To revise, use the trajectory-amendment pattern or @Planner re-run authorization."
 
+**Degraded pre-flight (partial init — NOT a Hard Stop).** If `PROJECT_CONTEXT.md` is missing: inherit project identity from TRAJECTORY.md + IMPACT.md (@Intake already resolved it — its Open Question will say so) and mark the pre-exit checklist item "PROJECT_CONTEXT.md read" as `N/A — ausente (init parcial); identidade herdada do TRAJECTORY`. Do not block planning on its absence.
+
 ### Step 2 — Read everything (the order in §"What you read" above)
 
 Read TRAJECTORY first, in full. Take notes by section. Then read IMPACT, STATE, PROJECT_CONTEXT, the knowledge layer as needed.
@@ -151,7 +153,7 @@ Validation plan:
 - §3.MUST `<criterion>` — verified by:
   - Unit test: `<file>:<test-name>`
   - E2E scenario: `<file>:<scenario-name>` (if applicable)
-  - CI check: `bifrost-validate api-calls` (if applicable)
+  - CI check: `bifrost-validate i18n-parity` (i18n criteria) / `bifrost-validate state` — only checks that EXIST; never cite `api-calls` (not implemented)
 - §3.MUST `<another>` — verified by:
   - ...
 - §3.SHOULD `<criterion>` — verified by: ...
@@ -163,7 +165,7 @@ Plus general categories:
 - **E2E scenarios** — happy + sad + edge cases per `bifrost-qa-validator` §2.
 - **Performance checks** — page load / action / list / search per `knowledge/TECH_STACK.md` perf targets.
 - **Accessibility checks** — keyboard / screen-reader / contrast / touch / motion per `bifrost-qa-validator` §7.
-- **API-contract validation** — `bifrost-validate api-calls` over generated code.
+- **API-contract validation** — MANUAL: Backend confirms each endpoint (existence + shape) at handoff review; list the endpoints to confirm in HANDOFF.md. (`bifrost-validate api-calls` is NOT implemented — do not cite it as a verifier.)
 
 You don't write the test code yourself (that's `@CodeGen` per the spec, executed during /bifrost:build). You name the tests so `@QA` knows what to look for.
 

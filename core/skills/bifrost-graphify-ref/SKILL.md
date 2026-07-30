@@ -30,6 +30,21 @@ When you, as an agent, find yourself about to invent something, route through th
 
 If the answer to your question is in the knowledge layer, you must use what's there. Don't invent.
 
+## Authority order & the inference rule (HARD)
+
+When knowledge sources disagree, or a detail is missing, precedence is:
+
+1. **Component/API SOURCE code** — when the real repo is accessible, the source wins over every document.
+2. **`COMPONENT_LIBRARY.md` / `API_CONTRACTS.md`** — the curated contracts.
+3. **`FRONTEND_REPOSITORY_MANUAL.md`** — the broad survey (existence evidence, not contract evidence).
+4. **Inference** — and inference of an undocumented contract is **BLOCKING, never silent**.
+
+Concretely:
+
+- An item present in the MANUAL but absent from COMPONENT_LIBRARY.md **exists but its contract is UNCONFIRMED** — treat as level 4, not level 2.
+- If your work depends on an unconfirmed contract (does `app-checkbox` implement ControlValueAccessor? does `app-button` raise submit?), you may NOT assume the ergonomic answer. Record it as a **blocking dependency / Open Question** naming the exact contract to confirm and its owner (Backend / the component source), and either (a) build against the *documented* API only, or (b) leave the seam explicitly marked `[CONFIRMAR-NO-SOURCE]`.
+- Rationale: the pilot's root-cause bug was a silent CVA assumption on `app-checkbox`. Silent inference at the contract seam is how non-functional code reaches review labeled done.
+
 ---
 
 ## State A — today (no `graph.json`)

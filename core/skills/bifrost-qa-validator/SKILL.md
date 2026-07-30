@@ -136,6 +136,16 @@ describe('LoginComponent', () =>
 - Error state: `error$` emits → status-pill or `[error]` shown.
 - Accessibility: icon-only buttons have `aria-label`; form fields have visible labels.
 
+**Rendered-binding gate (mirror of `bifrost-code-review` §4.3.1 — QA enforces it independently):**
+
+For every UI-level MUST/SHOULD in TRAJECTORY §3, @QA verifies the spec that claims to cover it and **FAILS the criterion** if any of these hold:
+
+- The spec uses `NO_ERRORS_SCHEMA` or `CUSTOM_ELEMENTS_SCHEMA` (bindings to child components are never resolved — a broken template passes green).
+- The assertion targets class internals (`component.form`, direct `component.onX()` calls) instead of the rendered DOM path (detectChanges → rendered control state; DOM gesture → observable outcome).
+- The child components involved in the criterion (commonlib wrappers) are not imported from their real module.
+
+This is deliberately redundant with @CodeGen's self-review: generator and verifier reading the same rule from two places is the defense against correlated failure. A criterion whose test is theater is **not covered** — render verdict FAIL, name the spec and the missing rendered path.
+
 ---
 
 ## Section 4 — Service tests
@@ -271,7 +281,7 @@ Verify in Chrome DevTools mobile emulation OR a real device. The `@nx/cypress` s
 
 ## Section 9 — API-contract validation
 
-Independently of the unit-test mocks, `@QA` validates that the *real* endpoints called exist and accept/return the documented shape. This is where `bifrost-validate api-calls` (the CI step) joins the loop.
+Independently of the unit-test mocks, `@QA` validates that the *real* endpoints called exist and accept/return the documented shape — against `knowledge/API_CONTRACTS.md`, MANUALLY. (There is no automated `api-calls` CI check; do not claim one ran. Endpoints not present in API_CONTRACTS.md are a blocking dependency for Backend at handoff, per `bifrost-graphify-ref`'s authority order.)
 
 Checks:
 

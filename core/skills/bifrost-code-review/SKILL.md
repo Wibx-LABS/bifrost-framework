@@ -183,6 +183,16 @@ A spec that only tests the happy path is half-done.
 - [ ] No `setTimeout` / `setInterval` in tests — use `fakeAsync` + `tick()`.
 - [ ] No `done` callback usage — use `async` / `fakeAsync` or `firstValueFrom` / `lastValueFrom` for observables.
 
+### 4.3.1 — Rendered-binding rule (HARD, no exceptions)
+
+Any spec that verifies a **component-level acceptance criterion** (a TRAJECTORY §3 MUST/SHOULD that a user exercises through the UI — load-reflects, save-persists, click-does-X):
+
+- [ ] **`NO_ERRORS_SCHEMA` and `CUSTOM_ELEMENTS_SCHEMA` are FORBIDDEN** in that spec. Import the real module that declares the child components (e.g. `CommonlibModule`) so bindings actually resolve.
+- [ ] The assertion exercises the **rendered DOM path**, not the class internals: set state → `fixture.detectChanges()` → assert on the rendered control (checkbox checked, text shown); simulate the user gesture on the DOM (`DebugElement.triggerEventHandler` / native click) → assert the observable outcome (form value, dispatched action).
+- [ ] Asserting on `component.form.getRawValue()` or calling `component.onSave()` directly **does not count** as verifying a UI criterion — that is test theater: the binding seam (where template↔component contracts break) is never exercised.
+
+Rationale: the pilot's two must-fix bugs (form never wired to the checkboxes; Save button emitting nothing) passed green under `NO_ERRORS_SCHEMA` + direct method calls. This rule exists so that class of bug FAILS in QA instead of reaching the Backend reviewer.
+
 ### 4.4 — Mutation tests where it matters
 
 - [ ] Custom validators have positive AND negative test cases.

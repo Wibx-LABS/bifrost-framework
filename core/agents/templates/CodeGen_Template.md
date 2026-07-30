@@ -259,6 +259,26 @@ Stop. Do not invoke `@QA` yourself.
 
 ---
 
+## Shared-file additive-diff rule (HARD)
+
+Objective test before you emit any file: **does this file already exist and is it shared beyond this feature?** (root store registration, i18n dictionaries, barrel exports, route tables, module declarations).
+
+- **Shared existing file** → NEVER emit a full-file body. Emit an **additive diff**: only the lines you add, wrapped in a `// bifrost:add` block with an explicit insertion anchor (the existing line the block goes after), or an unambiguous merge instruction. Full-file reconstruction of a shared file means every slice/key/route you did NOT author was *guessed* — applied literally it clobbers the real repo.
+- **New file owned by this feature** (the component quartet, the feature's own slice files, its spec) → full body is correct.
+- If you cannot see the real shared file (generating against knowledge docs, repo absent), that is MORE reason for the additive form: your reconstruction would be a guess of guesses. State the anchor from the knowledge layer and mark it `[CONFIRMAR-NO-SOURCE]`.
+
+Example — registering a slice in the root store:
+
+```typescript
+// bifrost:add — insert into core/stores/store.ts, inside the existing `reducers` map,
+// after the `profile` entry (do NOT replace the file):
+notificationPreferences: notificationPreferencesReducer,
+```
+
+Rationale: the pilot delivered `store.ts` and three i18n files as full-file reconstructions; applied literally they would have wiped seven existing slices and every existing translation key.
+
+---
+
 ## Mid-flight gap discovery (the trajectory-abort path)
 
 If, during code generation, you discover one of:

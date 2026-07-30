@@ -55,6 +55,13 @@ Before reading anything substantive, verify your environment:
 - **`TRAJECTORY.md` does NOT yet exist** OR exists with `trajectory_status: draft`. If TRAJECTORY.md exists and is `locked`, you are NOT in a fresh-intake scenario. Hard Stop and surface to user: "TRAJECTORY.md is already locked. To re-do scope, this is a trajectory-abort scenario per ADR-008 — do you want to authorize @Intake re-run with a new schema_version?"
 - **`STATE.md` shows `status: pending`** OR (in re-run scenarios) `aborted` with explicit user authorization to restart. Otherwise Hard Stop: the lifecycle is in an unexpected state.
 
+**Degraded pre-flight (partial init — NOT a Hard Stop).** `bifrost-init` may not have run to completion: `.bifrost/` exists with a substantive PATIENT.md but support files are missing. Only two cases are recognized (do not invent branches for other permutations):
+
+- **`STATE.md` missing** → CREATE it yourself from the canonical template (`core/templates/STATE.md` in the framework repo), `status: pending`, and add a timeline entry: `state bootstrapped by @Intake (partial init)`. Then continue.
+- **`PROJECT_CONTEXT.md` missing** → derive project identity from the knowledge layer (`FRONTEND_REPOSITORY_MANUAL.md` §1-2, `TECH_STACK.md`) and record the absence as an Open Question in IMPACT.md (`PROJECT_CONTEXT.md ausente — identidade derivada do knowledge layer; confirmar com bifrost-init completo`). Do NOT Hard-Stop on its absence.
+
+Rationale: the pilot showed a filled PATIENT with no STATE/PROJECT_CONTEXT strands the whole lifecycle on an improvised recovery. This codifies the recovery.
+
 ### Step 2 — Read everything (the order in §"What you read" above)
 
 Read PROJECT_CONTEXT, PATIENT, the relevant knowledge sections, STATE. Take notes. The notes feed steps 3–6.
@@ -135,7 +142,7 @@ Use `core/templates/TRAJECTORY.md` (already hydrated to `.bifrost/TRAJECTORY.md`
 - Blocking dependencies: from IMPACT §7. Each: what + status + owner.
 - Must-not-break: existing flows / contracts / behaviors this feature must preserve. Each: name + how to verify.
 
-**§3 Acceptance criteria** — every PATIENT §3 "must work" becomes a TRAJECTORY MUST. Every "should work" becomes SHOULD. Every "could work" becomes MAY. For EACH, name the verifying artifact: a `@QA` test name (synthesized; @QA will use it during /bifrost:qa), a CI check (e.g., "bifrost-validate api-calls"), or a code-review item. This is the bridge from feature scope to test plan; if you can't name a verifier, the criterion isn't testable, which means it isn't a real criterion — push back on the user.
+**§3 Acceptance criteria** — every PATIENT §3 "must work" becomes a TRAJECTORY MUST. Every "should work" becomes SHOULD. Every "could work" becomes MAY. For EACH, name the verifying artifact: a `@QA` test name (synthesized; @QA will use it during /bifrost:qa), a CI check that EXISTS today (e.g., "bifrost-validate i18n-parity" for i18n criteria; NOT "api-calls" — that check is not implemented, endpoint existence is confirmed manually by Backend at handoff), or a code-review item. This is the bridge from feature scope to test plan; if you can't name a verifier, the criterion isn't testable, which means it isn't a real criterion — push back on the user.
 
 **§4 Architectural decisions** — this is YOUR distinctive contribution. Each decision: statement + rationale + alternatives ruled out. Examples are in the TRAJECTORY template. These choices BIND `@Planner` and `@CodeGen` — once locked, they're not re-litigated. Be specific. "We use NgRx" is too generic; "Search state lives in NgRx, not local component state, because shared with shopping app's results table — local @Input/@Output ruled out, would force prop drilling" is a real decision.
 

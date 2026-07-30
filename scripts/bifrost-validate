@@ -14,7 +14,7 @@ const command = args[0];
 const target = args[1];
 
 if (!command) {
-    console.log('Uso: bifrost-validate <state|plan|api-calls|standards|qa-report|merge-ready> [caminho]');
+    console.log('Uso: bifrost-validate <state|plan|i18n-parity|api-calls|standards|qa-report|merge-ready> [caminho]');
     process.exit(1);
 }
 
@@ -29,6 +29,9 @@ switch (command) {
         break;
     case 'api-calls':
         validateApiCalls();
+        break;
+    case 'i18n-parity':
+        validateI18nParity(target || 'apps/account/src/assets/i18n');
         break;
     case 'standards':
         validateStandards();
@@ -89,15 +92,81 @@ function validateQaReport(filePath) {
 }
 
 function validateApiCalls() {
-    console.log('[INFO] Verificando contratos de API com a base de conhecimento...');
-    // Placeholder for real graph validation logic
-    console.log('[OK] Todas as chamadas de API correspondem ao API_CONTRACTS.md');
+    // Honestidade > checkmark: NÃO imprimir OK falso. Verificação real exige o
+    // grafo/API do repo (não implementado). SKIP explícito, nunca "[OK]" mentiroso.
+    console.log('[SKIP] api-calls: verificação NÃO implementada (exige grafo/API do repo real).');
+    console.log('       Nenhuma chamada foi verificada — a confirmação dos endpoints é manual (Backend, no handoff).');
 }
 
 function validateStandards() {
-    console.log('[INFO] Verificando conformidade com padrões de código...');
-    // Placeholder for linting logic
-    console.log('[OK] Padrões de código mantidos.');
+    console.log('[SKIP] standards: verificação NÃO implementada (lint real roda via ESLint no repo).');
+    console.log('       Nenhum padrão foi verificado por este comando.');
+}
+
+// i18n-parity: os dicionários (en/es/pt-br) devem ter EXATAMENTE o mesmo key-set.
+// Protege o MUST de i18n mecanicamente. Exit 1 nomeando cada key divergente.
+function flattenKeys(obj, prefix) {
+    const keys = [];
+    for (const k of Object.keys(obj)) {
+        const full = prefix ? `${prefix}.${k}` : k;
+        const v = obj[k];
+        if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
+            keys.push(...flattenKeys(v, full));
+        } else {
+            keys.push(full);
+            if (typeof v === 'string' && v.trim() === '') {
+                keys.push(`${full}<<EMPTY>>`);
+            }
+        }
+    }
+    return keys;
+}
+
+function validateI18nParity(dir) {
+    const fullDir = path.resolve(process.cwd(), dir);
+    console.log(`[INFO] Verificando paridade i18n em: ${fullDir}`);
+    if (!fs.existsSync(fullDir)) {
+        console.error(`[ERRO] Diretório i18n não encontrado: ${fullDir}`);
+        process.exit(1);
+    }
+    const files = fs.readdirSync(fullDir).filter((f) => f.endsWith('.json'));
+    if (files.length < 2) {
+        console.error(`[ERRO] Paridade exige >=2 dicionários; encontrados: ${files.length ? files.join(', ') : 'nenhum'}`);
+        process.exit(1);
+    }
+    const sets = {};
+    for (const f of files) {
+        let parsed;
+        try {
+            parsed = JSON.parse(fs.readFileSync(path.join(fullDir, f), 'utf8'));
+        } catch (err) {
+            console.error(`[ERRO] ${f}: JSON inválido — ${err.message}`);
+            process.exit(1);
+        }
+        sets[f] = new Set(flattenKeys(parsed, ''));
+    }
+    const union = new Set();
+    for (const f of files) for (const k of sets[f]) union.add(k);
+    let failed = false;
+    for (const f of files) {
+        for (const k of union) {
+            if (k.endsWith('<<EMPTY>>')) {
+                if (sets[f].has(k)) {
+                    console.error(`[ERRO] ${f}: key com valor VAZIO: ${k.replace('<<EMPTY>>', '')}`);
+                    failed = true;
+                }
+                continue;
+            }
+            if (!sets[f].has(k)) {
+                console.error(`[ERRO] ${f}: key AUSENTE: ${k}`);
+                failed = true;
+            }
+        }
+    }
+    if (failed) {
+        process.exit(1);
+    }
+    console.log(`[OK] Paridade i18n: ${files.length} dicionários, ${[...union].filter((k) => !k.endsWith('<<EMPTY>>')).length} keys idênticas, nenhuma vazia.`);
 }
 
 function validateMergeReady() {

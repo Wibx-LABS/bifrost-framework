@@ -100,7 +100,7 @@ Feature: {{PROJECT_NAME}}
      Priority MUST | SHOULD | MAY. Each criterion names what artifact verifies it. -->
 
 - **MUST:** <!-- criterion -->
-  - **Verified by:** <!-- e.g. @QA test "search-returns-results", or CI check "bifrost-validate api-calls" -->
+  - **Verified by:** <!-- e.g. @QA test "search-returns-results", or CI check "bifrost-validate i18n-parity" (only cite CI checks that exist) -->
 - **MUST:** <!-- criterion -->
   - **Verified by:** <!-- ... -->
 - **SHOULD:** <!-- criterion -->
