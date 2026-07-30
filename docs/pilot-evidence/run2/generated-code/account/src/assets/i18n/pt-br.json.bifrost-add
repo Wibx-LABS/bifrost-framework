@@ -1,0 +1,23 @@
+// bifrost:add — ADDITIVE DIFF for apps/account/src/assets/i18n/pt-br.json
+// (shared file: do NOT replace the file; merge the block below only).
+// Same key set as en.json / es.json (TRAJECTORY §3 MUST-4 parity).
+//
+// Insert as a NEW top-level key, after the last existing top-level key (keep JSON
+// comma discipline) [CONFIRMAR-NO-SOURCE: anchor — real dictionary not visible here]:
+
+"notification-preferences": {
+    "title": "Preferências de notificações",
+    "channels": {
+        "email": "Notificações por e-mail",
+        "push": "Notificações push",
+        "sms": "Notificações por SMS"
+    },
+    "actions": {
+        "save": "Salvar",
+        "retry": "Tentar novamente"
+    },
+    "feedback": {
+        "save-success": "Suas preferências de notificações foram salvas.",
+        "load-error": "Não foi possível carregar suas preferências de notificações."
+    }
+}

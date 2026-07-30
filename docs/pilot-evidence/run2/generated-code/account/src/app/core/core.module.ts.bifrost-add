@@ -1,0 +1,15 @@
+// bifrost:add — ADDITIVE DIFF for apps/account/src/app/core/core.module.ts
+// (shared file: do NOT replace the file; apply the two blocks below only).
+// Store/effects registration lives in CoreModule per manual §12 (Store Registration).
+
+// ── Block 1: import ──────────────────────────────────────────────────────────
+// Insert after the last existing effects import
+// [CONFIRMAR-NO-SOURCE: anchor — the real import list is not visible in this workspace]:
+import { NotificationPreferencesEffects } from './effects/notification-preferences.effects';
+
+// ── Block 2: effects registration ────────────────────────────────────────────
+// Insert inside the existing `EffectsModule.forRoot([...])` array, after the last
+// existing effects class. comma-dangle is `never` (manual §13): if this becomes the
+// LAST entry, drop its trailing comma and add one to the previous entry
+// [CONFIRMAR-NO-SOURCE: anchor]:
+    NotificationPreferencesEffects,

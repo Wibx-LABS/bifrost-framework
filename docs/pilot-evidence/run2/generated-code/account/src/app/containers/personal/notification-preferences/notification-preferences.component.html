@@ -1,0 +1,73 @@
+<!--
+    Bifrost OPEN SOURCE
+    ~~~~~~~~~~~~~~~~~
+    Copyright (C) 2026 Open Source Community - MIT License.
+
+    @file notification-preferences.component.html
+    @author @CodeGen via /bifrost:build
+    @date Thursday, July 30th 2026 04:30:00 pm
+    @description Template for the Notification Preferences screen. commonlib
+                 wrappers only (app-card / app-skeleton-loading / app-status-pill /
+                 app-checkbox / app-button); every rendered string goes through
+                 the translate pipe (en / es / pt-br).
+
+    Per TRAJECTORY §4 decision 2 (pilot run-1 C1/C2 guard): commonlib wrappers are
+    bound ONLY through their documented Inputs/Outputs — app-checkbox via
+    [label]/[checked]/(checkedChange) (COMPONENT_LIBRARY §Form), never
+    formControlName/CVA; there is deliberately no <form> element, so Save can never
+    ride a native submit — it is wired via app-button (click) only. app-toggle was
+    ruled out because its contract is still unconfirmed (COMPONENT_CONTRACTS_TODO;
+    §2 blocking dependency resolved by the §4.D2 deterministic fallback).
+-->
+<app-card [title]="'notification-preferences.title' | translate">
+
+    <!-- Loading state (TRAJECTORY §3 SHOULD-2): skeleton, never unbound controls. -->
+    <app-skeleton-loading
+        *ngIf="isLoading$ | async"
+        [lines]="3"
+        [width]="'100%'">
+    </app-skeleton-loading>
+
+    <!-- Load-error state (TRAJECTORY §3 MUST-3 + MAY-1): translated message + retry. -->
+    <div *ngIf="(hasLoadError$ | async) === true" class="load-error" role="alert">
+        <app-status-pill [type]="'error'">
+            {{ 'notification-preferences.feedback.load-error' | translate }}
+        </app-status-pill>
+
+        <app-button
+            [label]="'notification-preferences.actions.retry' | translate"
+            [type]="'secondary'"
+            (click)="onRetry()">
+        </app-button>
+    </div>
+
+    <!-- Loaded state (TRAJECTORY §3 MUST-1): controls render server truth, then stage edits. -->
+    <div *ngIf="(preferences$ | async) !== null" class="channels">
+        <app-checkbox
+            [label]="'notification-preferences.channels.email' | translate"
+            [checked]="form.controls.email.value"
+            (checkedChange)="onChannelChange('email', $event)">
+        </app-checkbox>
+
+        <app-checkbox
+            [label]="'notification-preferences.channels.push' | translate"
+            [checked]="form.controls.push.value"
+            (checkedChange)="onChannelChange('push', $event)">
+        </app-checkbox>
+
+        <app-checkbox
+            [label]="'notification-preferences.channels.sms' | translate"
+            [checked]="form.controls.sms.value"
+            (checkedChange)="onChannelChange('sms', $event)">
+        </app-checkbox>
+
+        <app-button
+            class="save-action"
+            [label]="'notification-preferences.actions.save' | translate"
+            [type]="'primary'"
+            [disabled]="isSaveDisabled$ | async"
+            (click)="onSave()">
+        </app-button>
+    </div>
+
+</app-card>

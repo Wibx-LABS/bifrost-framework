@@ -1,0 +1,23 @@
+// bifrost:add — ADDITIVE DIFF for apps/account/src/app/core/stores/store.ts
+// (shared file: do NOT replace the file; apply the three blocks below only).
+// Per TRAJECTORY §2 must-not-break: only additive registration in store.ts;
+// no existing slice, key, or reducer entry is modified or removed.
+
+// ── Block 1: imports ─────────────────────────────────────────────────────────
+// Insert after the last existing store import at the top of the file
+// [CONFIRMAR-NO-SOURCE: anchor — the real import list is not visible in this workspace]:
+import { notificationPreferencesReducer } from './notification-preferences/notification-preferences.reducer';
+import { NotificationPreferencesStore } from './notification-preferences/notification-preferences.store';
+
+// ── Block 2: AppState interface ──────────────────────────────────────────────
+// Insert inside the existing `AppState` interface, after the last existing slice
+// property (e.g. after `changePassword` / `sidebar` — manual §5.1)
+// [CONFIRMAR-NO-SOURCE: anchor]:
+    notificationPreferences: NotificationPreferencesStore;
+
+// ── Block 3: reducers map ────────────────────────────────────────────────────
+// Insert inside the existing `reducers` ActionReducerMap, after the last existing
+// entry, keeping the map's key order. comma-dangle is `never` (manual §13): if this
+// becomes the LAST entry, drop its trailing comma and add one to the previous entry
+// [CONFIRMAR-NO-SOURCE: anchor]:
+    notificationPreferences: notificationPreferencesReducer,

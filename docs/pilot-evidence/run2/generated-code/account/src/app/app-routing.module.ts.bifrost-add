@@ -1,0 +1,16 @@
+// bifrost:add — ADDITIVE DIFF for apps/account/src/app/app-routing.module.ts
+// (shared file: do NOT replace the file; apply the block below only).
+// Per TRAJECTORY §2 must-not-break: route added additively; existing routes untouched.
+
+// ── Block 1: lazy route ──────────────────────────────────────────────────────
+// Insert into the existing root `routes` array, after the last existing
+// `personal/...` route entry. Replicate whatever route guards the sibling
+// personal/* routes carry (authenticated area, §2 security boundaries)
+// comma-dangle is `never` (manual §13): if this becomes the LAST entry, drop its
+// trailing comma and add one to the previous entry
+// [CONFIRMAR-NO-SOURCE: anchor + guard list — real route table not visible in this workspace]:
+    {
+        path: 'personal/notification-preferences',
+        loadChildren: () => import('./containers/personal/notification-preferences/notification-preferences.module')
+            .then((m) => m.NotificationPreferencesModule)
+    },

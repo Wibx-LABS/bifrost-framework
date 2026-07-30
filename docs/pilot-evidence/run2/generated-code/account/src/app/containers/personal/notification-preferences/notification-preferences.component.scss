@@ -1,0 +1,33 @@
+/*
+ * Bifrost OPEN SOURCE
+ * ------------------
+ * Copyright (C) 2026 Open Source Community - MIT License.
+ *
+ * @file notification-preferences.component.scss
+ * @author @CodeGen via /bifrost:build
+ * @date Thursday, July 30th 2026 04:30:00 pm
+ * @description Layout-only styles for the Notification Preferences screen.
+ *              No hardcoded colors and no hardcoded media queries (GOTCHAS
+ *              §Styling): color and theming stay with the commonlib wrappers.
+ */
+
+.channels
+{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.save-action
+{
+    align-self: flex-start;
+    margin-top: 8px;
+}
+
+.load-error
+{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+}

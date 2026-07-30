@@ -1,0 +1,25 @@
+// bifrost:add — ADDITIVE DIFF for apps/account/src/assets/i18n/en.json
+// (shared file: do NOT replace the file; merge the block below only).
+// Per TRAJECTORY §2 must-not-break: only added keys — zero existing keys modified
+// or deleted. Per §4 decision 6: notification-preferences.* namespace; key set is
+// identical across en/es/pt-br (MUST-4 parity).
+//
+// Insert as a NEW top-level key, after the last existing top-level key (keep JSON
+// comma discipline) [CONFIRMAR-NO-SOURCE: anchor — real dictionary not visible here]:
+
+"notification-preferences": {
+    "title": "Notification preferences",
+    "channels": {
+        "email": "Email notifications",
+        "push": "Push notifications",
+        "sms": "SMS notifications"
+    },
+    "actions": {
+        "save": "Save",
+        "retry": "Try again"
+    },
+    "feedback": {
+        "save-success": "Your notification preferences were saved.",
+        "load-error": "We could not load your notification preferences."
+    }
+}
